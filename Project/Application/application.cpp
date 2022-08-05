@@ -1,4 +1,5 @@
 #include "application.h"
+#include "BaseDataOperations/include/comparator.h"
 using namespace std;
 HWND win;
 winmodule::window* winclass;

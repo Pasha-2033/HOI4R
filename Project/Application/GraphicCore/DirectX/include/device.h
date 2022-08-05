@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include <variant>
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>			//DirectX::
@@ -28,26 +27,26 @@ namespace dxmodule {
 		public:
 			shaderoperator();
 			~shaderoperator();
-			ID3D11PixelShader* getpixelshader(LPCWSTR shadername);
-			ID3D11VertexShader* getvertexshader(LPCWSTR shadername);
-			ID3D11Device* getpixelshaderdevice(LPCWSTR shadername);
-			ID3D11Device* getvertexshaderdevice(LPCWSTR shadername);
-			bool addpixelshader(WCHAR* filename, LPCWSTR shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device);
-			bool addvertexshader(WCHAR* filename, LPCWSTR shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device);
+			ID3D11PixelShader* getpixelshader(WCHAR* shadername);
+			ID3D11VertexShader* getvertexshader(WCHAR* shadername);
+			ID3D11Device* getpixelshaderdevice(WCHAR* shadername);
+			ID3D11Device* getvertexshaderdevice(WCHAR* shadername);
+			bool addpixelshader(WCHAR* filename, WCHAR* shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device);
+			bool addvertexshader(WCHAR* filename, WCHAR* shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device);
 			void deletepixelshader(WCHAR* shadername);
 			void deletevertexshader(WCHAR* shadername);
 		private:
 			struct pixelshader {
 				ID3D11PixelShader* shader;
 				ID3D11Device* device;
-				LPCWSTR name;
+				WCHAR* name;
 				~pixelshader();
 			};
 			struct vertexshader {
 				ID3D11InputLayout* shaderlayout;
 				ID3D11VertexShader* shader;
 				ID3D11Device* device;
-				LPCWSTR name;
+				WCHAR* name;
 				~vertexshader();
 			};
 			HRESULT compileshader(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);

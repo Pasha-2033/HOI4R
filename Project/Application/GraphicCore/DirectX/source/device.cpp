@@ -81,21 +81,21 @@ IDXGISwapChain* dxmodule::directx::getswapchain() {
 
 dxmodule::shaderoperator::shaderoperator() {}
 dxmodule::shaderoperator::~shaderoperator() {}
-ID3D11PixelShader* dxmodule::shaderoperator::getpixelshader(LPCWSTR shadername) {
+ID3D11PixelShader* dxmodule::shaderoperator::getpixelshader(WCHAR* shadername) {
 	size_t size = pixelshaders.size();
 	for (size_t i = 0; i < size; i++) {
-		if (pixelshaders[i]->name == shadername) return pixelshaders[i]->shader;
+		if (wcscmp((const WCHAR*) pixelshaders[i]->name, (const WCHAR*)shadername) == 0) return pixelshaders[i]->shader;
 	}
 	return nullptr;
 }
-ID3D11VertexShader* dxmodule::shaderoperator::getvertexshader(LPCWSTR shadername) {
+ID3D11VertexShader* dxmodule::shaderoperator::getvertexshader(WCHAR* shadername) {
 	size_t size = vertexshaders.size();
 	for (size_t i = 0; i < size; i++) {
-		if (vertexshaders[i]->name == shadername) return vertexshaders[i]->shader;
+		if (wcscmp((const WCHAR*)vertexshaders[i]->name, (const WCHAR*)shadername) == 0) return vertexshaders[i]->shader;
 	}
 	return nullptr;
 }
-bool dxmodule::shaderoperator::addpixelshader(WCHAR* filename, LPCWSTR shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device) {
+bool dxmodule::shaderoperator::addpixelshader(WCHAR* filename, WCHAR* shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device) {
 	ID3DBlob* shaderblob = nullptr;
 	HRESULT hr = compileshader(filename, entrypoint, shadermodel, &shaderblob);
 	if (FAILED(hr)) return false; //add log
@@ -113,7 +113,7 @@ bool dxmodule::shaderoperator::addpixelshader(WCHAR* filename, LPCWSTR shadernam
 	pixelshaders[lastindex]->name = shadername;
 	return true;
 }
-bool dxmodule::shaderoperator::addvertexshader(WCHAR* filename, LPCWSTR shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device) {
+bool dxmodule::shaderoperator::addvertexshader(WCHAR* filename, WCHAR* shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device) {
 	ID3DBlob* shaderblob = nullptr;
 	HRESULT hr = compileshader(filename, entrypoint, shadermodel, &shaderblob);
 	if (FAILED(hr)) return false; //add log
@@ -152,8 +152,9 @@ bool dxmodule::shaderoperator::addvertexshader(WCHAR* filename, LPCWSTR shaderna
 }
 void dxmodule::shaderoperator::deletepixelshader(WCHAR* shadername) {
 	size_t size = pixelshaders.size();
-	for (size_t i; i < size; i++) {
-		if (pixelshaders[i]->name == shadername) {
+	for (size_t i = 0; i < size; i++) {
+		if (*pixelshaders[i]->name == *shadername) {
+			delete pixelshaders[i]->shader;
 			pixelshaders.erase(pixelshaders.begin() + i);
 			break;
 		}
@@ -163,10 +164,12 @@ void dxmodule::shaderoperator::deletepixelshader(WCHAR* shadername) {
 
 dxmodule::shaderoperator::pixelshader::~pixelshader() {
 	delete shader;
+	delete name;
 }
 dxmodule::shaderoperator::vertexshader::~vertexshader() {
 	delete shaderlayout;
 	delete shader;
+	delete name;
 }
 HRESULT dxmodule::shaderoperator::compileshader(WCHAR* file, LPCSTR entrypoint, LPCSTR profile, ID3DBlob** blobout) {
 	HRESULT hr = S_OK;
