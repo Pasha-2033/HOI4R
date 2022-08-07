@@ -3,6 +3,8 @@ using namespace std;
 HWND win;
 winmodule::window* winclass;
 dxmodule::directx* dx;
+dxmodule::pixelshaderoperator* pso;
+dxmodule::vertexshaderoperator* vso;
 LRESULT CALLBACK WndProc(HWND hWnd, uint32_t message, WPARAM wParam, LPARAM lParam) {
     switch (message) {
         PAINTSTRUCT ps;
@@ -28,6 +30,9 @@ int main() {
     winclass->setH(500);
     winclass->setV(true);
     dx = new dxmodule::directx(winclass);
+    pso = new dxmodule::pixelshaderoperator();
+    vso = new dxmodule::vertexshaderoperator();
+    pso->addshader((WCHAR*)L"Resources/GFX/FX/tempPixelShader.hlsl", (WCHAR*)L"pixel shader 0", "PS", "fx_5_0", dx->getdevice());
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0))
     {

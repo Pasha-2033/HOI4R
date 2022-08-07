@@ -43,6 +43,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="resources\GFX\FX\tempPixelShader.hlsl" />
+    <FxCompile Include="Application\Resources\GFX\FX\tempPixelShader.hlsl" />
   </ItemGroup>
 </Project>

@@ -12,6 +12,7 @@ namespace dxmodule {
 			directx(winmodule::window* win);
 			~directx();
 			HRESULT getHR();
+			ID3D11Device* getdevice();
 			ID3D11DeviceContext* getdevicecontext();
 			IDXGISwapChain* getswapchain();
 			ID3D11RenderTargetView* getrendertargetview();
@@ -49,7 +50,7 @@ namespace dxmodule {
 		private:
 			bool updatestate = true;
 	};
-	class pixelshaderoperator : virtual shaderoperator {
+	class pixelshaderoperator : virtual public shaderoperator {
 		public:
 			pixelshaderoperator();
 			~pixelshaderoperator();
@@ -61,7 +62,7 @@ namespace dxmodule {
 				ID3D11PixelShader* shader = nullptr;
 			};
 	};
-	class vertexshaderoperator : virtual shaderoperator {
+	class vertexshaderoperator : virtual public shaderoperator {
 		public:
 			vertexshaderoperator();
 			~vertexshaderoperator();

@@ -67,6 +67,9 @@ dxmodule::directx::~directx() {
 HRESULT dxmodule::directx::getHR() {
 	return hr;
 }
+ID3D11Device* dxmodule::directx::getdevice() {
+	return device;
+}
 ID3D11DeviceContext* dxmodule::directx::getdevicecontext() {
 	return devicecontext;
 }
@@ -177,7 +180,12 @@ dxmodule::pixelshaderoperator::pixelshader::~pixelshader() {
 //класс vertexshaderoperator сохраняет в shaders <vertexshader*>, так что явное приведение shaderparentclass* к vertexshader* не нарушает полиморфизм
 dxmodule::vertexshaderoperator::vertexshaderoperator() {}
 dxmodule::vertexshaderoperator::~vertexshaderoperator() {}
-ID3D11InputLayout* dxmodule::vertexshaderoperator::getshaderlayout(size_t shaderid) {}
+ID3D11InputLayout* dxmodule::vertexshaderoperator::getshaderlayout(size_t shaderid) {
+	if (shaderid < size) {
+		return ((vertexshader*)shaders[shaderid])->shaderlayout;
+	}
+	return nullptr;
+}
 ID3D11VertexShader* dxmodule::vertexshaderoperator::getvertexshader(size_t shaderid) {
 	if (shaderid < size) {
 		return ((vertexshader*)shaders[shaderid])->shader;
