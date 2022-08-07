@@ -1,5 +1,4 @@
 #include "application.h"
-#include "BaseDataOperations/include/comparator.h"
 using namespace std;
 HWND win;
 winmodule::window* winclass;
@@ -24,7 +23,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, uint32_t message, WPARAM wParam, LPARAM lPar
 void render();
 int main() {
     winclass = new winmodule::window(WndProc, L"tempclass", L"title");
-    winclass->setshowmode(winmodule::customsize);
+    winclass->setshowmode(winmodule::windowshowmode::customsize);
     winclass->setW(500);
     winclass->setH(500);
     winclass->setV(true);

@@ -44,7 +44,7 @@ uint32_t winmodule::window::getW() {
 uint32_t winmodule::window::getH() {
     return h;
 }
-uint32_t winmodule::window::getshowmode() {
+winmodule::windowshowmode winmodule::window::getshowmode() {
     return sm;
 }
 bool winmodule::window::getV() {
@@ -78,7 +78,7 @@ void winmodule::window::setH(uint32_t height) {
     h = height;
     MoveWindow(win, x, y, w, h, TRUE);
 }
-void winmodule::window::setshowmode(uint32_t showmode) {
+void winmodule::window::setshowmode(windowshowmode showmode) {
     sm = showmode;
     LONG HWNDStyle = GetWindowLong(win, GWL_STYLE);
     LONG HWNDStyleEx = GetWindowLong(win, GWL_EXSTYLE);
@@ -86,7 +86,7 @@ void winmodule::window::setshowmode(uint32_t showmode) {
     uint32_t screenW = screensize.right - screensize.left;
     uint32_t screenH = screensize.bottom - screensize.top;
     switch (sm) {
-        case fullscreen:
+    case windowshowmode::fullscreen:
             //полноэкранный режим
             x, y = 0;
             w = screenW;
@@ -101,7 +101,7 @@ void winmodule::window::setshowmode(uint32_t showmode) {
             MoveWindow(win, x, y, w, h, TRUE);
             ShowWindow(win, v & sw_type);
             break;
-        case customsize:
+    case windowshowmode::customsize:
             //обычное окно, произвольный размер
             if (w > screenW) {
                 w = screenW;

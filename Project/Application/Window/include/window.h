@@ -7,7 +7,7 @@
 #define DEFAULT_ICON LoadIcon(NULL, IDI_APPLICATION)
 namespace winmodule {
 	//Объявление перечислений
-	enum windowshowmode {
+	enum class windowshowmode {
 		fullscreen,
 		customsize
 	};
@@ -20,35 +20,35 @@ namespace winmodule {
 			//Инициация и деструкция
 			window(WNDPROC wndproc, LPCTSTR classname, LPCTSTR title, RECT rect = getscreensize());
 			~window();
-			uint32_t getX();						//получение х позиции окна
-			uint32_t getY();						//получение у позиции окна
-			void setX(uint32_t xpos);				//установка х позиции окна
-			void setY(uint32_t ypos);				//установка у позиции окна
-			uint32_t getW();						//получение ширины окна
-			uint32_t getH();						//получение высоты окна
-			void setW(uint32_t width);				//установка ширины окна
-			void setH(uint32_t height);				//установка высоты окна
-			uint32_t getshowmode();					//получить тип отображения
-			void setshowmode(uint32_t showmode);	//установить тип отображения
-			bool getV();							//получить видимость
-			void setV(bool visible);				//установить видимость
-			LPCTSTR gettitle();						//получить заголовок
-			void settitle(LPCTSTR wintitle);		//установить заголовок
-			LPCTSTR getclassname();					//получить имя класса					
-			HWND getwindow();						//получить указатель на окно
-			HRESULT getHR();						//получить статус результата создания окна
+			uint32_t getX();								//получение х позиции окна
+			uint32_t getY();								//получение у позиции окна
+			void setX(uint32_t xpos);						//установка х позиции окна
+			void setY(uint32_t ypos);						//установка у позиции окна
+			uint32_t getW();								//получение ширины окна
+			uint32_t getH();								//получение высоты окна
+			void setW(uint32_t width);						//установка ширины окна
+			void setH(uint32_t height);						//установка высоты окна
+			windowshowmode getshowmode();					//получить тип отображения
+			void setshowmode(windowshowmode showmode);		//установить тип отображения
+			bool getV();									//получить видимость
+			void setV(bool visible);						//установить видимость
+			LPCTSTR gettitle();								//получить заголовок
+			void settitle(LPCTSTR wintitle);				//установить заголовок
+			LPCTSTR getclassname();							//получить имя класса					
+			HWND getwindow();								//получить указатель на окно
+			HRESULT getHR();								//получить статус результата создания окна
 		private:
-			HRESULT hr;								//статус результата создания окна
-			LPCTSTR classname;						//имя класса окна
-			LPCTSTR title;							//заголовок окна
-			HINSTANCE hinstance = NULL;				//дескриптор экземпляра
-			HWND win;								//окно
-			uint32_t x;								//позиция окна по х
-			uint32_t y;								//позиция окна по у
-			uint32_t w;								//ширина окна
-			uint32_t h;								//высота окна
-			uint32_t sm = fullscreen;				//тип  окна (управление окном)
-			uint32_t sw_type = SW_HIDE;				//тип показа окна
-			bool v = false;							//видимо ли окно
+			HRESULT hr;										//статус результата создания окна
+			LPCTSTR classname;								//имя класса окна
+			LPCTSTR title;									//заголовок окна
+			HINSTANCE hinstance = NULL;						//дескриптор экземпляра
+			HWND win;										//окно
+			uint32_t x;										//позиция окна по х
+			uint32_t y;										//позиция окна по у
+			uint32_t w;										//ширина окна
+			uint32_t h;										//высота окна
+			windowshowmode sm = windowshowmode::fullscreen;	//тип  окна (управление окном)
+			uint32_t sw_type = SW_HIDE;						//тип показа окна
+			bool v = false;									//видимо ли окно
 	};
 }

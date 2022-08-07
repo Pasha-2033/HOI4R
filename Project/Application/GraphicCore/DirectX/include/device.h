@@ -23,16 +23,68 @@ namespace dxmodule {
 			IDXGISwapChain* swapchain;
 			ID3D11RenderTargetView* rendertargetview;
 	};
+
+
+	inline HRESULT compileshader(WCHAR* file, LPCSTR entrypoint, LPCSTR profile, ID3DBlob** blobout);
 	class shaderoperator {
 		public:
 			shaderoperator();
+			virtual ~shaderoperator();
+			virtual bool addshader(WCHAR* filename, WCHAR* shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device) = 0;
+			size_t getshaderid(WCHAR* shadername);
+			size_t getvectorsize();
+			void deleteshader(size_t shaderid);
+			void updatehandled();
+			ID3D11Device* getshaderdevice(size_t shaderid);
+			WCHAR* getname(size_t shaderid);
+			bool getupdatestate();
+		protected:
+			struct shaderparentclass {	
+				ID3D11Device* device = nullptr;					
+				WCHAR* name = nullptr;
+				virtual ~shaderparentclass();
+			};
+			std::vector<shaderparentclass*> shaders = {};
+			size_t size = 0;
+		private:
+			bool updatestate = true;
+	};
+	class pixelshaderoperator : virtual shaderoperator {
+		public:
+			pixelshaderoperator();
+			~pixelshaderoperator();
+			ID3D11PixelShader* getpixelshader(size_t shaderid);
+			bool addshader(WCHAR* filename, WCHAR* shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device);
+		private:
+			struct pixelshader : shaderparentclass {
+				~pixelshader();
+				ID3D11PixelShader* shader = nullptr;
+			};
+	};
+	class vertexshaderoperator : virtual shaderoperator {
+		public:
+			vertexshaderoperator();
+			~vertexshaderoperator();
+			ID3D11InputLayout* getshaderlayout(size_t shaderid);
+			ID3D11VertexShader* getvertexshader(size_t shaderid);
+			bool addshader(WCHAR* filename, WCHAR* shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device);
+		private:
+			struct vertexshader : shaderparentclass {
+				~vertexshader();
+				ID3D11InputLayout* shaderlayout = nullptr;
+				ID3D11VertexShader* shader = nullptr;
+			};
+	};
+
+
+	/*class shaderoperator {
+		public:
+			shaderoperator();
 			~shaderoperator();
-			ID3D11PixelShader* getpixelshader(WCHAR* shadername);
-			ID3D11VertexShader* getvertexshader(WCHAR* shadername);
-			ID3D11Device* getpixelshaderdevice(WCHAR* shadername);
-			ID3D11Device* getvertexshaderdevice(WCHAR* shadername);
 			bool addpixelshader(WCHAR* filename, WCHAR* shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device);
 			bool addvertexshader(WCHAR* filename, WCHAR* shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device);
+			bool getpixelshaderupdatedstate();
+			bool getvertexshaderupdatedstate();
 			void deletepixelshader(WCHAR* shadername);
 			void deletevertexshader(WCHAR* shadername);
 		private:
@@ -52,8 +104,7 @@ namespace dxmodule {
 			HRESULT compileshader(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
 			std::vector<pixelshader*> pixelshaders;
 			std::vector<vertexshader*> vertexshaders;
-	};
-	struct simplevertex {
-		DirectX::XMFLOAT3 pos;
-	};
+			bool pixelshaderupdated = true;
+			bool vertexshaderupdated = true;
+	};*/
 }
