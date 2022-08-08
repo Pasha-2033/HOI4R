@@ -79,8 +79,21 @@ ID3D11RenderTargetView* dxmodule::directx::getrendertargetview() {
 IDXGISwapChain* dxmodule::directx::getswapchain() {
 	return swapchain;
 }
-
-
+template<typename T> HRESULT dxmodule::createvertexbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer, T* structure) {
+	ID3D11Buffer* buffer = nullptr;
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(T) * 1;	//может только sizeof(structure)???
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = 0;
+	D3D11_SUBRESOURCE_DATA InitData;
+	ZeroMemory(&InitData, sizeof(InitData));
+	InitData.pSysMem = structure;
+	HRESULT hr = device->CreateBuffer(&bd, &InitData, &buffer);
+	*bufferpointer = buffer;
+	return hr;
+}
 HRESULT dxmodule::compileshader(WCHAR* file, LPCSTR entrypoint, LPCSTR profile, ID3DBlob** blobout) {
 	HRESULT hr = S_OK;
 	ID3DBlob* errorblob = nullptr;
@@ -94,9 +107,12 @@ HRESULT dxmodule::compileshader(WCHAR* file, LPCSTR entrypoint, LPCSTR profile, 
 	};
 	hr = D3DCompileFromFile(file, defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, entrypoint, profile, flags, 0, &shaderblob, &errorblob);
 	if (FAILED(hr)) {
-		if (errorblob != NULL) OutputDebugStringA((char*)errorblob->GetBufferPointer());
-		if (errorblob) errorblob->Release(); //add log
-		return hr;
+		if (errorblob) {
+			OutputDebugStringA((char*)errorblob->GetBufferPointer());
+			errorblob->Release();
+		}
+		if (shaderblob) shaderblob->Release();
+		return hr;//add log
 	}
 	if (errorblob) errorblob->Release();
 	*blobout = shaderblob;
@@ -106,10 +122,12 @@ HRESULT dxmodule::compileshader(WCHAR* file, LPCSTR entrypoint, LPCSTR profile, 
 
 dxmodule::shaderoperator::shaderoperator() {}
 dxmodule::shaderoperator::~shaderoperator() {
+	/*
 	for (size_t i = size - 1; i > -1; i--) {
 		delete shaders[i];
 		shaders.pop_back();
 	}
+	*/
 }
 size_t dxmodule::shaderoperator::getshaderid(WCHAR* shadername) {
 	for (size_t i = 0; i < size; i++) {
@@ -162,15 +180,16 @@ bool dxmodule::pixelshaderoperator::addshader(WCHAR* filename, WCHAR* shadername
 	ID3DBlob* shaderblob = nullptr;
 	HRESULT hr = compileshader(filename, entrypoint, shadermodel, &shaderblob);
 	if (FAILED(hr)) return false; //add log
-	shaderparentclass* pixelshaderpointer = new pixelshader;
-	hr = device->CreatePixelShader(shaderblob->GetBufferPointer(), shaderblob->GetBufferSize(), NULL, &((pixelshader*)pixelshaderpointer)->shader);
+	pixelshader* pixelshaderpointer = new pixelshader;
+	hr = device->CreatePixelShader(shaderblob->GetBufferPointer(), shaderblob->GetBufferSize(), NULL, &pixelshaderpointer->shader);
 	if (FAILED(hr)) {
 		shaderblob->Release();
 		return false; //add log
 	}
 	shaderblob->Release();
-	((pixelshader*)pixelshaderpointer)->name = shadername;
-	((pixelshader*)pixelshaderpointer)->device = device;
+	pixelshaderpointer->name = shadername;
+	pixelshaderpointer->device = device;
+	shaders.push_back(pixelshaderpointer);
 	size++;
 	return true;
 }
@@ -193,6 +212,36 @@ ID3D11VertexShader* dxmodule::vertexshaderoperator::getvertexshader(size_t shade
 	return nullptr;
 }
 bool dxmodule::vertexshaderoperator::addshader(WCHAR* filename, WCHAR* shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device) {
+	ID3DBlob* shaderblob = nullptr;
+	HRESULT hr = compileshader(filename, entrypoint, shadermodel, &shaderblob);
+	if (FAILED(hr)) return false; //add log
+	vertexshader* vertexshaderpointer = new vertexshader;
+	hr = device->CreateVertexShader(shaderblob->GetBufferPointer(), shaderblob->GetBufferSize(), NULL, &vertexshaderpointer->shader);
+	if (FAILED(hr)) {
+		shaderblob->Release();
+		return false; //add log
+	}
+	D3D11_INPUT_ELEMENT_DESC layout[] = {
+		{
+			"POSITION",
+			0,
+			DXGI_FORMAT_R32G32B32_FLOAT,
+			0,
+			0,
+			D3D11_INPUT_PER_VERTEX_DATA,
+			0
+		}
+	};
+	uint32_t numelements = ARRAYSIZE(layout);
+	hr = device->CreateInputLayout(layout, numelements, shaderblob->GetBufferPointer(), shaderblob->GetBufferSize(), &vertexshaderpointer->shaderlayout);
+	shaderblob->Release();
+	if (FAILED(hr)) {
+		delete vertexshaderpointer;
+		return false; //add log
+	}
+	vertexshaderpointer->device = device;
+	vertexshaderpointer->name = shadername;
+	shaders.push_back(vertexshaderpointer);
 	size++;
 	return true;
 }

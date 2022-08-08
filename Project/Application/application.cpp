@@ -1,10 +1,17 @@
 #include "application.h"
+
+#include <DirectXMath.h>			//DirectX::
+
+
 using namespace std;
 HWND win;
 winmodule::window* winclass;
 dxmodule::directx* dx;
 dxmodule::pixelshaderoperator* pso;
 dxmodule::vertexshaderoperator* vso;
+struct SimpleVertex {
+    DirectX::XMFLOAT3 pos;
+};
 LRESULT CALLBACK WndProc(HWND hWnd, uint32_t message, WPARAM wParam, LPARAM lParam) {
     switch (message) {
         PAINTSTRUCT ps;
@@ -30,9 +37,16 @@ int main() {
     winclass->setH(500);
     winclass->setV(true);
     dx = new dxmodule::directx(winclass);
-    pso = new dxmodule::pixelshaderoperator();
-    vso = new dxmodule::vertexshaderoperator();
-    pso->addshader((WCHAR*)L"Resources/GFX/FX/tempPixelShader.hlsl", (WCHAR*)L"pixel shader 0", "PS", "fx_5_0", dx->getdevice());
+    pso = new dxmodule::pixelshaderoperator;
+    vso = new dxmodule::vertexshaderoperator;
+    pso->addshader((WCHAR*)L"Application/Resources/GFX/FX/tempPixelShader.hlsl", (WCHAR*)L"pixel shader 0", "PS", "ps_5_0", dx->getdevice());
+    vso->addshader((WCHAR*)L"Application/Resources/GFX/FX/tempPixelShader.hlsl", (WCHAR*)L"vertex shader 0", "VS", "vs_5_0", dx->getdevice());
+    dx->getdevicecontext()->IASetInputLayout(vso->getshaderlayout(0));
+    ID3D11Buffer* b;
+    SimpleVertex xyz[]{
+        DirectX::XMFLOAT3(0, 0, 0)
+    };
+    dxmodule::createvertexbuffer(dx->getdevice(), &b, xyz);
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0))
     {

@@ -24,8 +24,7 @@ namespace dxmodule {
 			IDXGISwapChain* swapchain;
 			ID3D11RenderTargetView* rendertargetview;
 	};
-
-
+	template<typename T> inline HRESULT createvertexbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer, T* structure);
 	inline HRESULT compileshader(WCHAR* file, LPCSTR entrypoint, LPCSTR profile, ID3DBlob** blobout);
 	class shaderoperator {
 		public:
