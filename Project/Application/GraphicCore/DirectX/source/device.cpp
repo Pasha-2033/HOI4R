@@ -79,21 +79,6 @@ ID3D11RenderTargetView* dxmodule::directx::getrendertargetview() {
 IDXGISwapChain* dxmodule::directx::getswapchain() {
 	return swapchain;
 }
-template<typename T> HRESULT dxmodule::createvertexbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer, T* structure) {
-	ID3D11Buffer* buffer = nullptr;
-	D3D11_BUFFER_DESC bd;
-	ZeroMemory(&bd, sizeof(bd));
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(T) * 1;	//может только sizeof(structure)???
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd.CPUAccessFlags = 0;
-	D3D11_SUBRESOURCE_DATA InitData;
-	ZeroMemory(&InitData, sizeof(InitData));
-	InitData.pSysMem = structure;
-	HRESULT hr = device->CreateBuffer(&bd, &InitData, &buffer);
-	*bufferpointer = buffer;
-	return hr;
-}
 HRESULT dxmodule::compileshader(WCHAR* file, LPCSTR entrypoint, LPCSTR profile, ID3DBlob** blobout) {
 	HRESULT hr = S_OK;
 	ID3DBlob* errorblob = nullptr;
@@ -122,12 +107,7 @@ HRESULT dxmodule::compileshader(WCHAR* file, LPCSTR entrypoint, LPCSTR profile, 
 
 dxmodule::shaderoperator::shaderoperator() {}
 dxmodule::shaderoperator::~shaderoperator() {
-	/*
-	for (size_t i = size - 1; i > -1; i--) {
-		delete shaders[i];
-		shaders.pop_back();
-	}
-	*/
+	//delete ptr
 }
 size_t dxmodule::shaderoperator::getshaderid(WCHAR* shadername) {
 	for (size_t i = 0; i < size; i++) {

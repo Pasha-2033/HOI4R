@@ -31,7 +31,7 @@
     <ClInclude Include="Application\Window\include\window.h" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Application\Resources\GFX\FX\tempPixelShader.hlsl">
+    <FxCompile Include="Application\Resources\GFX\FX\tempPixelShader.fx">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
@@ -149,7 +149,7 @@
     </Link>
     <FxCompile>
       <ShaderType>Effect</ShaderType>
-      <ShaderModel>5.0</ShaderModel>
+      <ShaderModel>4.0</ShaderModel>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

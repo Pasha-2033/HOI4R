@@ -24,7 +24,22 @@ namespace dxmodule {
 			IDXGISwapChain* swapchain;
 			ID3D11RenderTargetView* rendertargetview;
 	};
-	template<typename T> inline HRESULT createvertexbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer, T* structure);
+	template<typename T>
+	HRESULT createvertexbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer, T structure[]) {
+		ID3D11Buffer* buffer = nullptr;
+		D3D11_BUFFER_DESC bd;
+		ZeroMemory(&bd, sizeof(bd));
+		bd.Usage = D3D11_USAGE_DEFAULT;
+		bd.ByteWidth = sizeof(T) * 3;
+		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		bd.CPUAccessFlags = 0;
+		D3D11_SUBRESOURCE_DATA InitData;
+		ZeroMemory(&InitData, sizeof(InitData));
+		InitData.pSysMem = structure;
+		HRESULT hr = device->CreateBuffer(&bd, &InitData, &buffer);
+		*bufferpointer = buffer;
+		return hr;
+	}
 	inline HRESULT compileshader(WCHAR* file, LPCSTR entrypoint, LPCSTR profile, ID3DBlob** blobout);
 	class shaderoperator {
 		public:
