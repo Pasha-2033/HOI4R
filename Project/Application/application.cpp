@@ -14,9 +14,9 @@ struct SimpleVertex {
     DirectX::XMFLOAT3 pos;
 };
 SimpleVertex xyz[]{
-        DirectX::XMFLOAT3(0.0f,  5.5f,  5.5f),
-        DirectX::XMFLOAT3(5.5f, -5.5f,  5.5f),
-        DirectX::XMFLOAT3(-5.5f, -5.5f,  5.5f)
+        DirectX::XMFLOAT3(0.0f,  0.5f,  0.0f),
+        DirectX::XMFLOAT3(0.5f, -0.5f,  0.0f),
+        DirectX::XMFLOAT3(-0.5f, -0.5f,  0.0f)
 };
 ID3D11Buffer* b;
 

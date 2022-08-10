@@ -32,7 +32,7 @@ dxmodule::directx::directx(winmodule::window* win) : cur_drivetype(D3D_DRIVER_TY
 	sd.OutputWindow = win->getwindow();
 	sd.SampleDesc.Count = 1;
 	sd.SampleDesc.Quality = 0;
-	sd.Windowed = TRUE;
+	sd.Windowed = TRUE;							//не полноэкранный режим, изменить по win (sm)
 	for (UINT drivertypeindex = 0; drivertypeindex < numdrivertypes; drivertypeindex++) {
 		cur_drivetype = drivertypes[drivertypeindex];
 		hr = D3D11CreateDeviceAndSwapChain(NULL, cur_drivetype, NULL, createdeviceflags, featurelevels, numfeaturelevels,

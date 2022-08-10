@@ -11,5 +11,9 @@ float4 VS(float4 Pos : POSITION) : SV_POSITION
 float4 PS(float4 Pos : SV_POSITION) : SV_Target
 {
 	// Возвращаем желтый цвет, непрозрачный (альфа == 1, альфа-канал не включен).	
-	return float4(1.0f, 0.0f, 0.0f, 1.0f);
+	//return float4(1.0f, 0.0f, 0.0f, 1.0f);
+	float K = 10.0f;
+	float dist = sqrt((Pos.x - 250.0f) * (Pos.x - 250.0f) + (Pos.y - 250.0f) * (Pos.y - 250.0f));
+	dist = (dist % K) / K;
+	return float4(dist, 0.0f, 0.0f, 1.0f);
 }
