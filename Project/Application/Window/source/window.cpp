@@ -146,11 +146,9 @@ WCHAR* winmodule::winsubproc::getname() {
 winmodule::extendedwinproc::extendedwinproc() {}
 winmodule::extendedwinproc::~extendedwinproc() {}
 LRESULT CALLBACK winmodule::extendedwinproc::wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
-    //вот здесь начинается вторая ступень лохотрона
-    //dxwindow::dxwindowclass* instance = reinterpret_cast<dxwindow::dxwindowclass*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
-    dxwindow::dxwindowclass* instance = (dxwindow::dxwindowclass*)(GetWindowLongPtr(hwnd, GWLP_USERDATA)); //тоже не работает
-    if (instance != 0) {
-        LRESULT lr = NULL;
+    dxwindow::dxwindowclass* instance = (dxwindow::dxwindowclass*)(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+    if (instance) {
+        LRESULT lr = DefWindowProc(hwnd, msg, wparam, lparam);
         for (winsubproc* subproc : instance->getwinproc()->eventhandler) {
             lr |= subproc->proc(hwnd, msg, wparam, lparam);
         }
