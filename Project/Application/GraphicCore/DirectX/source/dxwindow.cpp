@@ -1,8 +1,24 @@
 #include "../include/dxwindow.h"
-dxwindow::dxwindowclass::dxwindowclass() {
-	//здесь начинаетс€ перва€ ступень лохотрона, winproc - вызывает отсутсвие окна, а хотелось не this указывать
-	SetWindowLongPtr(window->getwindow(), GWLP_USERDATA, (LONG_PTR)this);
-	winproc->addsubproc((winmodule::winsubproc*) new winmodule::defaultwinproc((WCHAR*)L"name"));
+dxwindow::dxwindowclass::dxwindowclass(HINSTANCE hinstance) {
+	//инициализаци€
+	window = new winmodule::window(hinstance, winmodule::extendedwinproc::wndproc, (WCHAR*)L"tempclass", (WCHAR*)L"title");
+	hr = window->getHR();
+	if (FAILED(hr)) {
+		delete window;
+		return;
+	}
+	dx = new dxmodule::directx(window);
+	hr = dx->getHR();
+	if (FAILED(hr)) {
+		delete window;
+		delete dx;
+		return;
+	}
+	winproc = new winmodule::extendedwinproc;
+	SetWindowLongPtr(window->getwindow(), GWLP_USERDATA, (LONG_PTR)winproc);
+	//настройка процессов окна
+	winproc->addsubproc(new winmodule::defaultwinproc((WCHAR*)L"QUIT_MESSAGE"));
+	return;
 }
 dxwindow::dxwindowclass::~dxwindowclass() {
 
@@ -15,4 +31,7 @@ winmodule::window* dxwindow::dxwindowclass::getwindow() {
 }
 dxmodule::directx* dxwindow::dxwindowclass::getdx() {
 	return dx;
+}
+HRESULT dxwindow::dxwindowclass::getHR() {
+	return hr;
 }

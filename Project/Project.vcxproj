@@ -23,12 +23,14 @@
     <ClCompile Include="Application\application.cpp" />
     <ClCompile Include="Application\GraphicCore\DirectX\source\dxmodule.cpp" />
     <ClCompile Include="Application\GraphicCore\DirectX\source\dxwindow.cpp" />
+    <ClCompile Include="Application\Logger\source\enginelog.cpp" />
     <ClCompile Include="Application\Window\source\window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\application.h" />
     <ClInclude Include="Application\GraphicCore\DirectX\include\dxmodule.h" />
     <ClInclude Include="Application\GraphicCore\DirectX\include\dxwindow.h" />
+    <ClInclude Include="Application\Logger\include\enginelog.h" />
     <ClInclude Include="Application\Window\include\window.h" />
   </ItemGroup>
   <ItemGroup>

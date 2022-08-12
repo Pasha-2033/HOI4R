@@ -29,7 +29,7 @@ HRESULT winmodule::initwindow(HWND &window, HINSTANCE hinstance, WCHAR* classnam
     return S_OK;
 }
 //Классы и их функции
-winmodule::window::window(WNDPROC wndproc, WCHAR* winclassname, WCHAR* wintitle, RECT rect) : classname(winclassname), title(wintitle), x(rect.left), y(rect.top), w(rect.right - rect.left), h(rect.bottom - rect.top) {
+winmodule::window::window(HINSTANCE hinstance, WNDPROC wndproc, WCHAR* winclassname, WCHAR* wintitle, RECT rect) : classname(winclassname), title(wintitle), x(rect.left), y(rect.top), w(rect.right - rect.left), h(rect.bottom - rect.top) {
     hr = initwindow(win, hinstance, classname, title, wndproc, rect);
 }
 winmodule::window::~window() {}
@@ -146,19 +146,23 @@ WCHAR* winmodule::winsubproc::getname() {
 winmodule::extendedwinproc::extendedwinproc() {}
 winmodule::extendedwinproc::~extendedwinproc() {}
 LRESULT CALLBACK winmodule::extendedwinproc::wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
-    dxwindow::dxwindowclass* instance = (dxwindow::dxwindowclass*)(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+    winmodule::extendedwinproc* instance = (winmodule::extendedwinproc*)(GetWindowLongPtr(hwnd, GWLP_USERDATA));
     if (instance) {
         LRESULT lr = DefWindowProc(hwnd, msg, wparam, lparam);
-        for (winsubproc* subproc : instance->getwinproc()->eventhandler) {
+        for (winsubproc* subproc : instance->eventhandler) {
             lr |= subproc->proc(hwnd, msg, wparam, lparam);
         }
         return lr;
     }
     return DefWindowProc(hwnd, msg, wparam, lparam);
 }
-void winmodule::extendedwinproc::addsubproc(winsubproc* subproc) {
+bool winmodule::extendedwinproc::addsubproc(winsubproc* subproc) {
+    for (size_t i = 0; i < size; i++) {
+        if (wcscmp((const WCHAR*)eventhandler[i]->getname(), (const WCHAR*)subproc->getname()) == 0) return false; //add log (same name)
+    }
     eventhandler.push_back(subproc);
     size++;
+    return true;
 }
 void winmodule::extendedwinproc::deletesubproc(WCHAR* name) {
     for (size_t i = 0; i < size; i++) {
@@ -172,6 +176,20 @@ void winmodule::extendedwinproc::deletesubproc(WCHAR* name) {
 }
 size_t winmodule::extendedwinproc::getsize() {
     return size;
+}
+winmodule::winsubproc* winmodule::extendedwinproc::getsubproc(WCHAR* name) {
+    for (size_t i = 0; i < size; i++) {
+        if (wcscmp((const WCHAR*)eventhandler[i]->getname(), (const WCHAR*)name) == 0) {
+            return eventhandler[i];
+        }
+    }
+    return nullptr;
+}
+winmodule::winsubproc* winmodule::extendedwinproc::getsubproc(size_t id) {
+    if (id < size) {
+        return eventhandler[id];
+    }
+    return nullptr;
 }
 winmodule::defaultwinproc::defaultwinproc(WCHAR* name) : winmodule::winsubproc(name) {}
 winmodule::defaultwinproc::~defaultwinproc() {}

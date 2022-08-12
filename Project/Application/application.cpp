@@ -1,13 +1,11 @@
 #include "application.h"
-
 #include "GraphicCore/DirectX/include/dxwindow.h"
-#include "Window/include/window.h"
-
 int main() {
     dxwindow::dxwindowclass* dxwin = new dxwindow::dxwindowclass;
-    dxwin->getwindow()->setshowmode(winmodule::windowshowmode::customsize);
+    if (FAILED(dxwin->getHR())) return -1;
     dxwin->getwindow()->setW(500);
     dxwin->getwindow()->setH(500);
+    dxwin->getwindow()->setshowmode(winmodule::windowshowmode::customsize);
     dxwin->getwindow()->setV(true);
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0))

@@ -152,6 +152,9 @@ ID3D11PixelShader* dxmodule::pixelshaderoperator::getpixelshader(size_t shaderid
 	return nullptr;
 }
 bool dxmodule::pixelshaderoperator::addshader(WCHAR* filename, WCHAR* shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device) {
+	for (size_t i = 0; i < size; i++) {
+		if (wcscmp((const WCHAR*)shaders[i]->name, (const WCHAR*)shadername) == 0) return false; //add log (same name)
+	}
 	ID3DBlob* shaderblob = nullptr;
 	HRESULT hr = compileshader(filename, entrypoint, shadermodel, &shaderblob);
 	if (FAILED(hr)) return false; //add log
@@ -187,6 +190,9 @@ ID3D11VertexShader* dxmodule::vertexshaderoperator::getvertexshader(size_t shade
 	return nullptr;
 }
 bool dxmodule::vertexshaderoperator::addshader(WCHAR* filename, WCHAR* shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device) {
+	for (size_t i = 0; i < size; i++) {
+		if (wcscmp((const WCHAR*)shaders[i]->name, (const WCHAR*)shadername) == 0) return false; //add log (same name)
+	}
 	ID3DBlob* shaderblob = nullptr;
 	HRESULT hr = compileshader(filename, entrypoint, shadermodel, &shaderblob);
 	if (FAILED(hr)) return false; //add log

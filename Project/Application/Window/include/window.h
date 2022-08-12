@@ -20,7 +20,7 @@ namespace winmodule {
 	class window {
 		public:
 			//Инициация и деструкция
-			window(WNDPROC wndproc, WCHAR* classname, WCHAR* title, RECT rect = getscreensize());
+			window(HINSTANCE hinstance, WNDPROC wndproc, WCHAR* classname, WCHAR* title, RECT rect = getscreensize());
 			virtual ~window();
 			uint32_t getX();								//получение х позиции окна
 			uint32_t getY();								//получение у позиции окна
@@ -43,7 +43,6 @@ namespace winmodule {
 			HRESULT hr;										//статус результата создания окна
 			WCHAR* classname;								//имя класса окна
 			WCHAR* title;									//заголовок окна
-			HINSTANCE hinstance = NULL;						//дескриптор экземпляра
 			HWND win;										//окно
 			uint32_t x;										//позиция окна по х
 			uint32_t y;										//позиция окна по у
@@ -67,11 +66,13 @@ namespace winmodule {
 			extendedwinproc();
 			virtual ~extendedwinproc();
 			static LRESULT CALLBACK wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
-			void addsubproc(winsubproc* subproc);
+			bool addsubproc(winsubproc* subproc);
 			void deletesubproc(WCHAR* name);
 			size_t getsize();
-			std::vector<winsubproc*> eventhandler;
+			winsubproc* getsubproc(WCHAR* name);
+			winsubproc* getsubproc(size_t id);
 		private:
+			std::vector<winsubproc*> eventhandler;
 			size_t size = 0;
 	};
 	class defaultwinproc : public winsubproc {

@@ -6,15 +6,17 @@
 namespace dxwindow {
 	class dxwindowclass {
 		public:
-			dxwindowclass();
+			dxwindowclass(HINSTANCE hinstance = NULL);
 			~dxwindowclass();
 			winmodule::extendedwinproc* getwinproc();
 			winmodule::window* getwindow();
 			dxmodule::directx* getdx();
+			HRESULT getHR();
 		private:
-			winmodule::extendedwinproc* winproc = new winmodule::extendedwinproc;
-			winmodule::window* window = new winmodule::window(winmodule::extendedwinproc::wndproc, (WCHAR*)L"tempclass", (WCHAR*)L"title");
-			dxmodule::directx* dx = new dxmodule::directx(window);
+			HRESULT hr;
+			winmodule::extendedwinproc* winproc;
+			winmodule::window* window;
+			dxmodule::directx* dx;
 	};
 
 }
