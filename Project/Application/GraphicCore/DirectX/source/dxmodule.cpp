@@ -1,4 +1,4 @@
-#include "../include/device.h"
+#include "../include/dxmodule.h"
 //перейти на d3d12, а с нее вызывать 11/10/9, если 12 не удалось создать
 dxmodule::directx::directx(winmodule::window* win) : cur_drivetype(D3D_DRIVER_TYPE_NULL), device(nullptr), devicecontext(nullptr), swapchain(nullptr), rendertargetview(nullptr) {
 	D3D_DRIVER_TYPE drivertypes[] = {
@@ -103,8 +103,6 @@ HRESULT dxmodule::compileshader(WCHAR* file, LPCSTR entrypoint, LPCSTR profile, 
 	*blobout = shaderblob;
 	return S_OK;
 }
-
-
 dxmodule::shaderoperator::shaderoperator() {}
 dxmodule::shaderoperator::~shaderoperator() {
 	//delete ptr
@@ -143,10 +141,7 @@ WCHAR* dxmodule::shaderoperator::getname(size_t shaderid) {
 bool dxmodule::shaderoperator::getupdatestate() {
 	return updatestate;
 }
-dxmodule::shaderoperator::shaderparentclass::~shaderparentclass() {
-	delete name;
-}
-
+dxmodule::shaderoperator::shaderparentclass::~shaderparentclass() {}
 //класс pixelshaderoperator сохраняет в shaders <pixelshader*>, так что явное приведение shaderparentclass* к pixelshader* не нарушает полиморфизм
 dxmodule::pixelshaderoperator::pixelshaderoperator() {}
 dxmodule::pixelshaderoperator::~pixelshaderoperator() {}
@@ -229,123 +224,3 @@ dxmodule::vertexshaderoperator::vertexshader::~vertexshader() {
 	delete shaderlayout;
 	delete shader;
 }
-
-
-
-
-/*dxmodule::shaderoperator::shaderoperator() {}
-dxmodule::shaderoperator::~shaderoperator() {}
-bool dxmodule::shaderoperator::addpixelshader(WCHAR* filename, WCHAR* shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device) {
-	ID3DBlob* shaderblob = nullptr;
-	HRESULT hr = compileshader(filename, entrypoint, shadermodel, &shaderblob);
-	if (FAILED(hr)) return false; //add log
-	pixelshaders.push_back(new pixelshader);
-	size_t lastindex = pixelshaders.size() - 1;
-	hr = device->CreatePixelShader(shaderblob->GetBufferPointer(), shaderblob->GetBufferSize(), NULL, &pixelshaders[lastindex]->shader);
-	if (FAILED(hr)) {
-		delete pixelshaders[lastindex];
-		pixelshaders.pop_back();
-		shaderblob->Release(); 
-		return false; //add log
-	}
-	shaderblob->Release();
-	pixelshaders[lastindex]->device = device;
-	pixelshaders[lastindex]->name = shadername;
-	return true;
-}
-bool dxmodule::shaderoperator::addvertexshader(WCHAR* filename, WCHAR* shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device) {
-	ID3DBlob* shaderblob = nullptr;
-	HRESULT hr = compileshader(filename, entrypoint, shadermodel, &shaderblob);
-	if (FAILED(hr)) return false; //add log
-	vertexshaders.push_back(new vertexshader);
-	size_t lastindex = vertexshaders.size() - 1;
-	hr = device->CreateVertexShader(shaderblob->GetBufferPointer(), shaderblob->GetBufferSize(), NULL, &vertexshaders[lastindex]->shader);
-	if (FAILED(hr)) {
-		delete vertexshaders[lastindex];
-		vertexshaders.pop_back();
-		shaderblob->Release(); 
-		return false; //add log
-	}
-	D3D11_INPUT_ELEMENT_DESC layout[] = {
-		{
-			"POSITION",
-			0,
-			DXGI_FORMAT_R32G32B32_FLOAT,
-			0,
-			0,
-			D3D11_INPUT_PER_VERTEX_DATA,
-			0
-		}
-	};
-	uint32_t numelements = ARRAYSIZE(layout);
-	hr = device->CreateInputLayout(layout, numelements, shaderblob->GetBufferPointer(),
-		shaderblob->GetBufferSize(), &vertexshaders[lastindex]->shaderlayout);
-	shaderblob->Release();
-	if (FAILED(hr)) {
-		delete vertexshaders[lastindex];
-		vertexshaders.pop_back();
-		return false; //add log
-	}
-	vertexshaders[lastindex]->device = device;
-	vertexshaders[lastindex]->name = shadername;
-	return true;
-}
-bool dxmodule::shaderoperator::getpixelshaderupdatedstate() {
-	return pixelshaderupdated;
-}
-bool dxmodule::shaderoperator::getvertexshaderupdatedstate() {
-	return vertexshaderupdated;
-}
-void dxmodule::shaderoperator::deletepixelshader(WCHAR* shadername) {
-	size_t size = pixelshaders.size();
-	for (size_t i = 0; i < size; i++) {
-		if (wcscmp((const WCHAR*)pixelshaders[i]->name, (const WCHAR*)shadername) == 0) {
-			delete pixelshaders[i];
-			pixelshaders.erase(pixelshaders.begin() + i);
-			pixelshaderupdated = true;
-			break;
-		}
-	}
-}
-void dxmodule::shaderoperator::deletevertexshader(WCHAR* shadername) {
-	size_t size = vertexshaders.size();
-	for (size_t i = 0; i < size; i++) {
-		if (wcscmp((const WCHAR*)vertexshaders[i]->name, (const WCHAR*)shadername) == 0) {
-			delete vertexshaders[i];
-			vertexshaders.erase(vertexshaders.begin() + i);
-			break;
-		}
-	}
-}
-
-
-dxmodule::shaderoperator::pixelshader::~pixelshader() {
-	delete shader;
-	delete name;
-}
-dxmodule::shaderoperator::vertexshader::~vertexshader() {
-	delete shaderlayout;
-	delete shader;
-	delete name;
-}
-HRESULT dxmodule::shaderoperator::compileshader(WCHAR* file, LPCSTR entrypoint, LPCSTR profile, ID3DBlob** blobout) {
-	HRESULT hr = S_OK;
-	ID3DBlob* errorblob = nullptr;
-	ID3DBlob* shaderblob = nullptr;
-	UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
-	const D3D_SHADER_MACRO defines[] = {
-		"EXAMPLE_DEFINE",
-		"1",
-		NULL,
-		NULL
-	};
-	hr = D3DCompileFromFile(file, defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, entrypoint, profile, flags, 0, &shaderblob, &errorblob);
-	if (FAILED(hr)) {
-		if (errorblob != NULL) OutputDebugStringA((char*)errorblob->GetBufferPointer());
-		if (errorblob) errorblob->Release(); //add log
-		return hr;
-	}
-	if (errorblob) errorblob->Release();
-	*blobout = shaderblob;
-	return S_OK;
-}*/

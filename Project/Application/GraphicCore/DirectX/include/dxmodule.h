@@ -90,36 +90,4 @@ namespace dxmodule {
 				ID3D11VertexShader* shader = nullptr;
 			};
 	};
-
-
-	/*class shaderoperator {
-		public:
-			shaderoperator();
-			~shaderoperator();
-			bool addpixelshader(WCHAR* filename, WCHAR* shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device);
-			bool addvertexshader(WCHAR* filename, WCHAR* shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device);
-			bool getpixelshaderupdatedstate();
-			bool getvertexshaderupdatedstate();
-			void deletepixelshader(WCHAR* shadername);
-			void deletevertexshader(WCHAR* shadername);
-		private:
-			struct pixelshader {
-				ID3D11PixelShader* shader;
-				ID3D11Device* device;
-				WCHAR* name;
-				~pixelshader();
-			};
-			struct vertexshader {
-				ID3D11InputLayout* shaderlayout;
-				ID3D11VertexShader* shader;
-				ID3D11Device* device;
-				WCHAR* name;
-				~vertexshader();
-			};
-			HRESULT compileshader(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
-			std::vector<pixelshader*> pixelshaders;
-			std::vector<vertexshader*> vertexshaders;
-			bool pixelshaderupdated = true;
-			bool vertexshaderupdated = true;
-	};*/
 }

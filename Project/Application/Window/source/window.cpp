@@ -1,4 +1,5 @@
 #include "../include/window.h"
+#include "../../GraphicCore/DirectX/include/dxwindow.h"
 //Функции
 RECT winmodule::getscreensize() {
     RECT desktop;
@@ -6,7 +7,7 @@ RECT winmodule::getscreensize() {
     GetWindowRect(hDesktop, &desktop);
     return desktop;
 }
-HRESULT winmodule::initwindow(HWND &window, HINSTANCE hinstance, LPCTSTR classname, LPCTSTR title, WNDPROC wndproc, RECT rect, HICON hicon, HCURSOR hcursor) {
+HRESULT winmodule::initwindow(HWND &window, HINSTANCE hinstance, WCHAR* classname, WCHAR* title, WNDPROC wndproc, RECT rect, HICON hicon, HCURSOR hcursor) {
     //Регистрация класса
     WNDCLASSEX wcex;
     wcex.cbSize = sizeof(WNDCLASSEX);
@@ -28,7 +29,7 @@ HRESULT winmodule::initwindow(HWND &window, HINSTANCE hinstance, LPCTSTR classna
     return S_OK;
 }
 //Классы и их функции
-winmodule::window::window(WNDPROC wndproc, LPCTSTR winclassname, LPCTSTR wintitle, RECT rect) : classname(winclassname), title(wintitle), x(rect.left), y(rect.top), w(rect.right - rect.left), h(rect.bottom - rect.top) {
+winmodule::window::window(WNDPROC wndproc, WCHAR* winclassname, WCHAR* wintitle, RECT rect) : classname(winclassname), title(wintitle), x(rect.left), y(rect.top), w(rect.right - rect.left), h(rect.bottom - rect.top) {
     hr = initwindow(win, hinstance, classname, title, wndproc, rect);
 }
 winmodule::window::~window() {}
@@ -50,10 +51,10 @@ winmodule::windowshowmode winmodule::window::getshowmode() {
 bool winmodule::window::getV() {
     return v;
 }
-LPCTSTR winmodule::window::gettitle() {
+WCHAR* winmodule::window::gettitle() {
     return title;
 }
-LPCTSTR winmodule::window::getclassname() {
+WCHAR* winmodule::window::getclassname() {
     return classname;
 }
 HWND winmodule::window::getwindow() {
@@ -133,7 +134,54 @@ void winmodule::window::setV(bool visible) {
     v = visible;
     ShowWindow(win, v & sw_type);
 }
-void winmodule::window::settitle(LPCTSTR wintitle) {
+void winmodule::window::settitle(WCHAR* wintitle) {
     title = wintitle;
     SetWindowText(win, title);
+}
+winmodule::winsubproc::winsubproc(WCHAR* name) : name(name) {}
+winmodule::winsubproc::~winsubproc() {}
+WCHAR* winmodule::winsubproc::getname() {
+    return name;
+}
+winmodule::extendedwinproc::extendedwinproc() {}
+winmodule::extendedwinproc::~extendedwinproc() {}
+LRESULT CALLBACK winmodule::extendedwinproc::wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+    //вот здесь начинается вторая ступень лохотрона
+    //dxwindow::dxwindowclass* instance = reinterpret_cast<dxwindow::dxwindowclass*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+    dxwindow::dxwindowclass* instance = (dxwindow::dxwindowclass*)(GetWindowLongPtr(hwnd, GWLP_USERDATA)); //тоже не работает
+    if (instance != 0) {
+        LRESULT lr = NULL;
+        for (winsubproc* subproc : instance->getwinproc()->eventhandler) {
+            lr |= subproc->proc(hwnd, msg, wparam, lparam);
+        }
+        return lr;
+    }
+    return DefWindowProc(hwnd, msg, wparam, lparam);
+}
+void winmodule::extendedwinproc::addsubproc(winsubproc* subproc) {
+    eventhandler.push_back(subproc);
+    size++;
+}
+void winmodule::extendedwinproc::deletesubproc(WCHAR* name) {
+    for (size_t i = 0; i < size; i++) {
+        if (wcscmp((const WCHAR*)eventhandler[i]->getname(), (const WCHAR*)name) == 0) {
+            delete eventhandler[i];
+            eventhandler.erase(eventhandler.begin() + i);
+            size--;
+            return;
+        }
+    }
+}
+size_t winmodule::extendedwinproc::getsize() {
+    return size;
+}
+winmodule::defaultwinproc::defaultwinproc(WCHAR* name) : winmodule::winsubproc(name) {}
+winmodule::defaultwinproc::~defaultwinproc() {}
+LRESULT CALLBACK winmodule::defaultwinproc::proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+    switch (msg) {
+        case WM_DESTROY:
+            PostQuitMessage(0);
+            break;
+    }
+    return 0;
 }
