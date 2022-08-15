@@ -1,5 +1,4 @@
 #include "../include/dxmodule.h"
-//перейти на d3d12, а с нее вызывать 11/10/9, если 12 не удалось создать
 dxmodule::directx::directx(winmodule::window* win) : cur_drivetype(D3D_DRIVER_TYPE_NULL), device(nullptr), devicecontext(nullptr), swapchain(nullptr), rendertargetview(nullptr) {
 	D3D_DRIVER_TYPE drivertypes[] = {
 		D3D_DRIVER_TYPE_HARDWARE,
@@ -7,12 +6,13 @@ dxmodule::directx::directx(winmodule::window* win) : cur_drivetype(D3D_DRIVER_TY
 		D3D_DRIVER_TYPE_REFERENCE
 	};
 	D3D_FEATURE_LEVEL featurelevels[] = {
-		D3D_FEATURE_LEVEL_12_1,
-		D3D_FEATURE_LEVEL_12_0,
 		D3D_FEATURE_LEVEL_11_1,
 		D3D_FEATURE_LEVEL_11_0,
 		D3D_FEATURE_LEVEL_10_1,
-		D3D_FEATURE_LEVEL_10_0
+		D3D_FEATURE_LEVEL_10_0,
+		D3D_FEATURE_LEVEL_9_3,
+		D3D_FEATURE_LEVEL_9_2,
+		D3D_FEATURE_LEVEL_9_1
 	};
 	UINT numdrivertypes = ARRAYSIZE(drivertypes);
 	UINT numfeaturelevels = ARRAYSIZE(featurelevels);
@@ -32,7 +32,7 @@ dxmodule::directx::directx(winmodule::window* win) : cur_drivetype(D3D_DRIVER_TY
 	sd.OutputWindow = win->getwindow();
 	sd.SampleDesc.Count = 1;
 	sd.SampleDesc.Quality = 0;
-	sd.Windowed = TRUE;							//не полноэкранный режим, изменить по win (sm)
+	sd.Windowed = TRUE;
 	for (UINT drivertypeindex = 0; drivertypeindex < numdrivertypes; drivertypeindex++) {
 		cur_drivetype = drivertypes[drivertypeindex];
 		hr = D3D11CreateDeviceAndSwapChain(NULL, cur_drivetype, NULL, createdeviceflags, featurelevels, numfeaturelevels,
@@ -73,11 +73,109 @@ ID3D11Device* dxmodule::directx::getdevice() {
 ID3D11DeviceContext* dxmodule::directx::getdevicecontext() {
 	return devicecontext;
 }
+IDXGISwapChain* dxmodule::directx::getswapchain() {
+	return swapchain;
+}
 ID3D11RenderTargetView* dxmodule::directx::getrendertargetview() {
 	return rendertargetview;
 }
-IDXGISwapChain* dxmodule::directx::getswapchain() {
-	return swapchain;
+void dxmodule::directx::resizedx(winmodule::window* win) {
+	/*ID3D11Texture2D* backbuffer = nullptr;
+	DXGI_SWAP_CHAIN_DESC sd;
+	ZeroMemory(&sd, sizeof(sd));
+	sd.BufferCount = 1;
+	sd.BufferDesc.Width = win->getW();
+	sd.BufferDesc.Height = win->getH();
+	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	sd.BufferDesc.RefreshRate.Numerator = 75;
+	sd.BufferDesc.RefreshRate.Denominator = 1;
+	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	sd.OutputWindow = win->getwindow();
+	sd.SampleDesc.Count = 1;
+	sd.SampleDesc.Quality = 0;
+	sd.Windowed = TRUE;
+	D3D11_VIEWPORT vp;
+	vp.Width = (FLOAT)win->getW();
+	vp.Height = (FLOAT)win->getH();
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
+	IDXGIDevice* idxgi_device = nullptr;
+	IDXGIAdapter* idxgi_adapter = nullptr;
+	IDXGIFactory* idxgi_factory = nullptr;
+	device->QueryInterface(__uuidof(IDXGIDevice), (void**)&idxgi_device);
+	idxgi_device->GetParent(__uuidof(IDXGIAdapter), (void**)&idxgi_adapter);
+	idxgi_adapter->GetParent(__uuidof(IDXGIFactory), (void**)&idxgi_factory);
+	idxgi_factory->CreateSwapChain(device, &sd, &swapchain);
+	idxgi_device->Release();
+	idxgi_adapter->Release();
+	idxgi_factory->Release();
+	swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backbuffer);
+	devicecontext->OMSetRenderTargets(1, &rendertargetview, NULL);
+	devicecontext->RSSetViewports(1, &vp);*/
+	/**/
+	devicecontext->ClearState();
+	rendertargetview->Release();
+	swapchain->Release();
+	device->Release();
+	devicecontext->Release();
+	D3D_DRIVER_TYPE drivertypes[] = {
+		D3D_DRIVER_TYPE_HARDWARE,
+		D3D_DRIVER_TYPE_WARP,
+		D3D_DRIVER_TYPE_REFERENCE
+	};
+	D3D_FEATURE_LEVEL featurelevels[] = {
+		D3D_FEATURE_LEVEL_11_1,
+		D3D_FEATURE_LEVEL_11_0,
+		D3D_FEATURE_LEVEL_10_1,
+		D3D_FEATURE_LEVEL_10_0,
+		D3D_FEATURE_LEVEL_9_3,
+		D3D_FEATURE_LEVEL_9_2,
+		D3D_FEATURE_LEVEL_9_1
+	};
+	UINT numdrivertypes = ARRAYSIZE(drivertypes);
+	UINT numfeaturelevels = ARRAYSIZE(featurelevels);
+	UINT createdeviceflags = 0;
+	D3D_FEATURE_LEVEL featurelevel = D3D_FEATURE_LEVEL_11_0; //???
+	ID3D11Texture2D* backbuffer = nullptr;
+	D3D11_VIEWPORT vp;
+	DXGI_SWAP_CHAIN_DESC sd;
+	ZeroMemory(&sd, sizeof(sd));
+	sd.BufferCount = 1;
+	sd.BufferDesc.Width = win->getW();
+	sd.BufferDesc.Height = win->getH();
+	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	sd.BufferDesc.RefreshRate.Numerator = 75;
+	sd.BufferDesc.RefreshRate.Denominator = 1;
+	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	sd.OutputWindow = win->getwindow();
+	sd.SampleDesc.Count = 1;
+	sd.SampleDesc.Quality = 0;
+	sd.Windowed = TRUE;
+	for (UINT drivertypeindex = 0; drivertypeindex < numdrivertypes; drivertypeindex++) {
+		cur_drivetype = drivertypes[drivertypeindex];
+		hr = D3D11CreateDeviceAndSwapChain(NULL, cur_drivetype, NULL, createdeviceflags, featurelevels, numfeaturelevels,
+			D3D11_SDK_VERSION, &sd, &swapchain, &device, &featurelevel, &devicecontext);
+		if (SUCCEEDED(hr)) {
+			hr = swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backbuffer);
+			if (SUCCEEDED(hr)) {
+				hr = device->CreateRenderTargetView(backbuffer, NULL, &rendertargetview);
+				backbuffer->Release();
+				if (SUCCEEDED(hr)) {
+					vp.Width = (FLOAT)win->getW();
+					vp.Height = (FLOAT)win->getH();
+					vp.MinDepth = 0.0f;
+					vp.MaxDepth = 1.0f;
+					vp.TopLeftX = 0;
+					vp.TopLeftY = 0;
+					devicecontext->OMSetRenderTargets(1, &rendertargetview, NULL);
+					devicecontext->RSSetViewports(1, &vp);
+					break;
+				}
+			}
+		}
+	}/**/
 }
 HRESULT dxmodule::compileshader(WCHAR* file, LPCSTR entrypoint, LPCSTR profile, ID3DBlob** blobout) {
 	HRESULT hr = S_OK;

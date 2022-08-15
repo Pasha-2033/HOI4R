@@ -5,7 +5,6 @@
 #include <DirectXMath.h>			//DirectX::
 #include "DirectXPackedVector.h"	//DirectX::PackedVector::
 #include "../../../Window/include/window.h"
-//есть заметки в cpp!!!
 namespace dxmodule {
 	class directx {
 		public:
@@ -16,6 +15,7 @@ namespace dxmodule {
 			ID3D11DeviceContext* getdevicecontext();
 			IDXGISwapChain* getswapchain();
 			ID3D11RenderTargetView* getrendertargetview();
+			void resizedx(winmodule::window* win);
 		private:
 			HRESULT hr;
 			D3D_DRIVER_TYPE cur_drivetype;
@@ -64,7 +64,7 @@ namespace dxmodule {
 		private:
 			bool updatestate = true;
 	};
-	class pixelshaderoperator : virtual public shaderoperator {
+	class pixelshaderoperator : public shaderoperator {
 		public:
 			pixelshaderoperator();
 			~pixelshaderoperator();
@@ -76,7 +76,7 @@ namespace dxmodule {
 				ID3D11PixelShader* shader = nullptr;
 			};
 	};
-	class vertexshaderoperator : virtual public shaderoperator {
+	class vertexshaderoperator : public shaderoperator {
 		public:
 			vertexshaderoperator();
 			~vertexshaderoperator();

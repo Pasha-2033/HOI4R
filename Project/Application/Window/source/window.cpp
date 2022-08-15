@@ -24,7 +24,7 @@ HRESULT winmodule::initwindow(HWND &window, HINSTANCE hinstance, WCHAR* classnam
     wcex.hIconSm = hicon;
     if (!RegisterClassEx(&wcex)) return E_FAIL;
     //Создание окна
-    window = CreateWindow(classname, title, WS_OVERLAPPEDWINDOW, rect.left, rect.top, rect.right, rect.bottom, NULL, NULL, hinstance, NULL);
+    window = CreateWindow(classname, title, WS_OVERLAPPEDWINDOW, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, NULL, NULL, hinstance, NULL);
     if (!window) return E_FAIL;
     return S_OK;
 }
@@ -195,9 +195,15 @@ winmodule::defaultwinproc::defaultwinproc(WCHAR* name) : winmodule::winsubproc(n
 winmodule::defaultwinproc::~defaultwinproc() {}
 LRESULT CALLBACK winmodule::defaultwinproc::proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
     switch (msg) {
+        PAINTSTRUCT ps;
+        HDC hdc;
         case WM_DESTROY:
             PostQuitMessage(0);
             break;
+        //case WM_PAINT:
+        //    hdc = BeginPaint(hwnd, &ps);
+        //    EndPaint(hwnd, &ps);
+        //    break;
     }
     return 0;
 }

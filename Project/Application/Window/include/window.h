@@ -15,12 +15,12 @@ namespace winmodule {
 	};
 	//Объявление функций
 	RECT getscreensize();
-	HRESULT initwindow(HWND &window, HINSTANCE hinstance, WCHAR* classname, WCHAR* title, WNDPROC wndproc, RECT rect, HICON hicon = DEFAULT_ICON, HCURSOR hcursor = DEFAULT_CURSOR);
+	HRESULT initwindow(HWND& window, HINSTANCE hinstance, WCHAR* classname, WCHAR* title, WNDPROC wndproc, RECT rect = {0,0,0,0}, HICON hicon = DEFAULT_ICON, HCURSOR hcursor = DEFAULT_CURSOR);
 	//Объявление классов
 	class window {
 		public:
 			//Инициация и деструкция
-			window(HINSTANCE hinstance, WNDPROC wndproc, WCHAR* classname, WCHAR* title, RECT rect = getscreensize());
+			window(HINSTANCE hinstance, WNDPROC wndproc, WCHAR* classname, WCHAR* title, RECT rect = {0,0,0,0});
 			virtual ~window();
 			uint32_t getX();								//получение х позиции окна
 			uint32_t getY();								//получение у позиции окна
@@ -28,26 +28,23 @@ namespace winmodule {
 			void setY(uint32_t ypos);						//установка у позиции окна
 			uint32_t getW();								//получение ширины окна
 			uint32_t getH();								//получение высоты окна
-			void setW(uint32_t width);						//установка ширины окна
-			void setH(uint32_t height);						//установка высоты окна
+			virtual void setW(uint32_t width);				//установка ширины окна
+			virtual void setH(uint32_t height);				//установка высоты окна
 			windowshowmode getshowmode();					//получить тип отображения
 			void setshowmode(windowshowmode showmode);		//установить тип отображения
 			bool getV();									//получить видимость
 			void setV(bool visible);						//установить видимость
 			WCHAR* gettitle();								//получить заголовок
-			void settitle(WCHAR* wintitle);				//установить заголовок
+			void settitle(WCHAR* wintitle);					//установить заголовок
 			WCHAR* getclassname();							//получить имя класса					
 			HWND getwindow();								//получить указатель на окно
 			HRESULT getHR();								//получить статус результата создания окна
-		private:
+		protected:
 			HRESULT hr;										//статус результата создания окна
 			WCHAR* classname;								//имя класса окна
 			WCHAR* title;									//заголовок окна
 			HWND win;										//окно
-			uint32_t x;										//позиция окна по х
-			uint32_t y;										//позиция окна по у
-			uint32_t w;										//ширина окна
-			uint32_t h;										//высота окна
+			uint32_t x, y, w, h;							//положение и размер окна									
 			windowshowmode sm = windowshowmode::fullscreen;	//тип  окна (управление окном)
 			uint32_t sw_type = SW_HIDE;						//тип показа окна
 			bool v = false;									//видимо ли окно
