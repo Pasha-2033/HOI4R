@@ -14,7 +14,8 @@ dxwindow::dxwindowclass::dxwindowclass(HINSTANCE hinstance, bool updatedxmodule,
 	SetWindowLongPtr(win, GWLP_USERDATA, (LONG_PTR)winproc);
 	//настройка процессов окна
 	winproc->addsubproc(new winmodule::defaultwinproc((WCHAR*)L"QUIT_MESSAGE"));
-	return;
+	//настройка dx
+	dx->getdevicecontext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 dxwindow::dxwindowclass::~dxwindowclass() {}
 void dxwindow::dxwindowclass::setupdatedx(bool updatedxmodule) {
@@ -54,4 +55,55 @@ bool dxwindow::dxwindowclass::applypixelshader(size_t shaderid) {
 	if (!shader) return false;
 	dx->getdevicecontext()->PSSetShader(shader, NULL, 0);
 	return true;
+}
+//void optimise(vector<graphicobject>* gov);	//для того чтобы перевести shadername в shaderid, для более быстрого доступа
+size_t dxwindow::dxwindowclass::getshadervectorsize(bool ispixelshader) {
+	if (ispixelshader) {
+		return pso->getvectorsize();
+	}
+	else {
+		return vso->getvectorsize();
+	}
+}
+bool dxwindow::dxwindowclass::addshader(WCHAR* filename, WCHAR* shadername, LPCSTR entrypoint, LPCSTR shadermodel, bool ispixelshader) {
+	if (ispixelshader) {
+		return pso->addshader(filename, shadername, entrypoint, shadermodel, dx->getdevice());
+	}
+	else {
+		return vso->addshader(filename, shadername, entrypoint, shadermodel, dx->getdevice());
+	}
+}
+bool dxwindow::dxwindowclass::hasshader(WCHAR* shadername, bool ispixelshader) {
+	if (ispixelshader) {
+		if (pso->getshaderid(shadername) < 0) return false;
+	}
+	else {
+		if (vso->getshaderid(shadername) < 0) return false;
+	}
+	return true;
+}
+void dxwindow::dxwindowclass::deleteshader(WCHAR* shadername, bool ispixelshader) {
+	if (ispixelshader) {
+		pso->deleteshader(pso->getshaderid(shadername));
+	}
+	else {
+		vso->deleteshader(vso->getshaderid(shadername));
+	}
+	//update graphic objects (to do)
+}
+std::vector<WCHAR*> dxwindow::dxwindowclass::getshaderlist(bool ispixelshader) {
+	std::vector<WCHAR*> v = {};
+	if (ispixelshader) {
+		size_t size = pso->getvectorsize();
+		for (size_t i = 0; i < size; i++) {
+			v.push_back(pso->getname(i));
+		}
+	}
+	else {
+		size_t size = vso->getvectorsize();
+		for (size_t i = 0; i < size; i++) {
+			v.push_back(vso->getname(i));
+		}
+	}
+	return v;
 }

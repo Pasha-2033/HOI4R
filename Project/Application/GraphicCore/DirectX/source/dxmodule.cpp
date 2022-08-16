@@ -16,7 +16,7 @@ dxmodule::directx::directx(winmodule::window* win) : cur_drivetype(D3D_DRIVER_TY
 	};
 	UINT numdrivertypes = ARRAYSIZE(drivertypes);
 	UINT numfeaturelevels = ARRAYSIZE(featurelevels);
-	UINT createdeviceflags = 0;
+	UINT createdeviceflags = 0;//D3D11_CREATE_DEVICE_DEBUG;
 	D3D_FEATURE_LEVEL featurelevel = D3D_FEATURE_LEVEL_11_0; //???
 	ID3D11Texture2D* backbuffer = nullptr;
 	D3D11_VIEWPORT vp;
@@ -79,21 +79,11 @@ IDXGISwapChain* dxmodule::directx::getswapchain() {
 ID3D11RenderTargetView* dxmodule::directx::getrendertargetview() {
 	return rendertargetview;
 }
-void dxmodule::directx::resizedx(winmodule::window* win) {
-	/*ID3D11Texture2D* backbuffer = nullptr;
-	DXGI_SWAP_CHAIN_DESC sd;
-	ZeroMemory(&sd, sizeof(sd));
-	sd.BufferCount = 1;
-	sd.BufferDesc.Width = win->getW();
-	sd.BufferDesc.Height = win->getH();
-	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	sd.BufferDesc.RefreshRate.Numerator = 75;
-	sd.BufferDesc.RefreshRate.Denominator = 1;
-	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	sd.OutputWindow = win->getwindow();
-	sd.SampleDesc.Count = 1;
-	sd.SampleDesc.Quality = 0;
-	sd.Windowed = TRUE;
+bool dxmodule::directx::resizedx(winmodule::window* win) {
+	IDXGIDevice* idxgidevice = NULL;
+	IDXGIAdapter* idxgiadapter = NULL;
+	IDXGIFactory* idxgifactory = NULL;
+	ID3D11Texture2D* backbuffer = nullptr;
 	D3D11_VIEWPORT vp;
 	vp.Width = (FLOAT)win->getW();
 	vp.Height = (FLOAT)win->getH();
@@ -101,45 +91,6 @@ void dxmodule::directx::resizedx(winmodule::window* win) {
 	vp.MaxDepth = 1.0f;
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
-	IDXGIDevice* idxgi_device = nullptr;
-	IDXGIAdapter* idxgi_adapter = nullptr;
-	IDXGIFactory* idxgi_factory = nullptr;
-	device->QueryInterface(__uuidof(IDXGIDevice), (void**)&idxgi_device);
-	idxgi_device->GetParent(__uuidof(IDXGIAdapter), (void**)&idxgi_adapter);
-	idxgi_adapter->GetParent(__uuidof(IDXGIFactory), (void**)&idxgi_factory);
-	idxgi_factory->CreateSwapChain(device, &sd, &swapchain);
-	idxgi_device->Release();
-	idxgi_adapter->Release();
-	idxgi_factory->Release();
-	swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backbuffer);
-	devicecontext->OMSetRenderTargets(1, &rendertargetview, NULL);
-	devicecontext->RSSetViewports(1, &vp);*/
-	/**/
-	devicecontext->ClearState();
-	rendertargetview->Release();
-	swapchain->Release();
-	device->Release();
-	devicecontext->Release();
-	D3D_DRIVER_TYPE drivertypes[] = {
-		D3D_DRIVER_TYPE_HARDWARE,
-		D3D_DRIVER_TYPE_WARP,
-		D3D_DRIVER_TYPE_REFERENCE
-	};
-	D3D_FEATURE_LEVEL featurelevels[] = {
-		D3D_FEATURE_LEVEL_11_1,
-		D3D_FEATURE_LEVEL_11_0,
-		D3D_FEATURE_LEVEL_10_1,
-		D3D_FEATURE_LEVEL_10_0,
-		D3D_FEATURE_LEVEL_9_3,
-		D3D_FEATURE_LEVEL_9_2,
-		D3D_FEATURE_LEVEL_9_1
-	};
-	UINT numdrivertypes = ARRAYSIZE(drivertypes);
-	UINT numfeaturelevels = ARRAYSIZE(featurelevels);
-	UINT createdeviceflags = 0;
-	D3D_FEATURE_LEVEL featurelevel = D3D_FEATURE_LEVEL_11_0; //???
-	ID3D11Texture2D* backbuffer = nullptr;
-	D3D11_VIEWPORT vp;
 	DXGI_SWAP_CHAIN_DESC sd;
 	ZeroMemory(&sd, sizeof(sd));
 	sd.BufferCount = 1;
@@ -153,29 +104,47 @@ void dxmodule::directx::resizedx(winmodule::window* win) {
 	sd.SampleDesc.Count = 1;
 	sd.SampleDesc.Quality = 0;
 	sd.Windowed = TRUE;
-	for (UINT drivertypeindex = 0; drivertypeindex < numdrivertypes; drivertypeindex++) {
-		cur_drivetype = drivertypes[drivertypeindex];
-		hr = D3D11CreateDeviceAndSwapChain(NULL, cur_drivetype, NULL, createdeviceflags, featurelevels, numfeaturelevels,
-			D3D11_SDK_VERSION, &sd, &swapchain, &device, &featurelevel, &devicecontext);
-		if (SUCCEEDED(hr)) {
-			hr = swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backbuffer);
-			if (SUCCEEDED(hr)) {
-				hr = device->CreateRenderTargetView(backbuffer, NULL, &rendertargetview);
-				backbuffer->Release();
-				if (SUCCEEDED(hr)) {
-					vp.Width = (FLOAT)win->getW();
-					vp.Height = (FLOAT)win->getH();
-					vp.MinDepth = 0.0f;
-					vp.MaxDepth = 1.0f;
-					vp.TopLeftX = 0;
-					vp.TopLeftY = 0;
-					devicecontext->OMSetRenderTargets(1, &rendertargetview, NULL);
-					devicecontext->RSSetViewports(1, &vp);
-					break;
-				}
-			}
-		}
-	}/**/
+	hr = device->QueryInterface(__uuidof(IDXGIDevice), (void**)&idxgidevice);
+	if (FAILED(hr)) return false;
+	hr = idxgidevice->GetAdapter(&idxgiadapter);
+	if (FAILED(hr)) return false;
+	hr = idxgiadapter->GetParent(__uuidof(IDXGIFactory), (void**)&idxgifactory);
+	if (FAILED(hr)) return false;
+	rendertargetview->Release();
+	swapchain->Release();
+	idxgifactory->CreateSwapChain(device, &sd, &swapchain);
+	swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backbuffer);
+	device->CreateRenderTargetView(backbuffer, NULL, &rendertargetview);
+	devicecontext->OMSetRenderTargets(1, &rendertargetview, NULL);
+	devicecontext->RSSetViewports(1, &vp);
+	return true;
+}
+HRESULT dxmodule::createindexbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer, WORD structure[]) {
+	ID3D11Buffer* buffer = nullptr;
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(structure) * sizeof(WORD);
+	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	bd.CPUAccessFlags = 0;
+	D3D11_SUBRESOURCE_DATA InitData;
+	ZeroMemory(&InitData, sizeof(InitData));
+	InitData.pSysMem = structure;
+	HRESULT hr = device->CreateBuffer(&bd, &InitData, &buffer);
+	*bufferpointer = buffer;
+	return hr;
+}
+HRESULT dxmodule::createconstbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer) {
+	ID3D11Buffer* buffer = nullptr;
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(constantbufferstruct);
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = 0;
+	HRESULT hr = device->CreateBuffer(&bd, nullptr, &buffer);
+	*bufferpointer = buffer;
+	return hr;
 }
 HRESULT dxmodule::compileshader(WCHAR* file, LPCSTR entrypoint, LPCSTR profile, ID3DBlob** blobout) {
 	HRESULT hr = S_OK;
@@ -205,11 +174,11 @@ dxmodule::shaderoperator::shaderoperator() {}
 dxmodule::shaderoperator::~shaderoperator() {
 	//delete ptr
 }
-size_t dxmodule::shaderoperator::getshaderid(WCHAR* shadername) {
+int dxmodule::shaderoperator::getshaderid(WCHAR* shadername) {
 	for (size_t i = 0; i < size; i++) {
 		if (wcscmp((const WCHAR*)shaders[i]->name, (const WCHAR*)shadername) == 0) return i;
 	}
-	return NULL;
+	return -1;
 }
 size_t dxmodule::shaderoperator::getvectorsize() {
 	return size;
@@ -219,6 +188,7 @@ void dxmodule::shaderoperator::deleteshader(size_t shaderid) {
 		delete shaders[shaderid];
 		shaders.erase(shaders.begin() + shaderid);
 		size--;
+		updatestate = true;
 	}
 }
 void dxmodule::shaderoperator::updatehandled() {
@@ -301,15 +271,8 @@ bool dxmodule::vertexshaderoperator::addshader(WCHAR* filename, WCHAR* shadernam
 		return false; //add log
 	}
 	D3D11_INPUT_ELEMENT_DESC layout[] = {
-		{
-			"POSITION",
-			0,
-			DXGI_FORMAT_R32G32B32_FLOAT,
-			0,
-			0,
-			D3D11_INPUT_PER_VERTEX_DATA,
-			0
-		}
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	uint32_t numelements = ARRAYSIZE(layout);
 	hr = device->CreateInputLayout(layout, numelements, shaderblob->GetBufferPointer(), shaderblob->GetBufferSize(), &vertexshaderpointer->shaderlayout);

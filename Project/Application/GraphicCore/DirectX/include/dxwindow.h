@@ -4,6 +4,7 @@
 #include "dxmodule.h"
 #include <Windows.h>
 namespace dxwindow {
+	static const UINT stride = sizeof(dxmodule::simplevertex);
 	class dxwindowclass : public winmodule::window {
 		public:
 			dxwindowclass(HINSTANCE hinstance = NULL, bool updatedxmodule = false, RECT rect = {0,0,0,0});
@@ -19,17 +20,20 @@ namespace dxwindow {
 			bool applyvertexshader(size_t shaderid);
 			bool applypixelshader(size_t shaderid);
 			//void optimise(vector<graphicobject>* gov);	//для того чтобы перевести shadername в shaderid, для более быстрого доступа
+			bool addshader(WCHAR* filename, WCHAR* shadername, LPCSTR entrypoint, LPCSTR shadermodel, bool ispixelshader);
+			bool hasshader(WCHAR* shadername, bool ispixelshader);
+			void deleteshader(WCHAR* shadername, bool ispixelshader);
+			size_t getshadervectorsize(bool ispixelshader);
+			std::vector<WCHAR*> getshaderlist(bool ispixelshader);
 
-			dxmodule::pixelshaderoperator* pso = new dxmodule::pixelshaderoperator; //temp put to private
-			dxmodule::vertexshaderoperator* vso = new dxmodule::vertexshaderoperator;//temp put to private
+
 		private:
 			bool updatedx = false;
 			HRESULT hr;
 			winmodule::extendedwinproc* winproc;
 			dxmodule::directx* dx;
-			//dxmodule::pixelshaderoperator* pso;
-			//dxmodule::vertexshaderoperator* vso;
-			ID3D11Buffer* vertexbuffer = nullptr;
+			dxmodule::pixelshaderoperator* pso = new dxmodule::pixelshaderoperator;
+			dxmodule::vertexshaderoperator* vso = new dxmodule::vertexshaderoperator;
 			static const UINT offset = 0;
 	};
 

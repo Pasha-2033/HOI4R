@@ -6,6 +6,16 @@
 #include "DirectXPackedVector.h"	//DirectX::PackedVector::
 #include "../../../Window/include/window.h"
 namespace dxmodule {
+	struct simplevertex {
+		DirectX::XMFLOAT3 position;	// Координаты точки в пространстве
+		DirectX::XMFLOAT2 texture;	// Координаты текстуры
+		DirectX::XMFLOAT3 normal;	// Нормаль вершины
+	};
+	struct constantbufferstruct {
+		DirectX::XMMATRIX worldmatrix;		// Матрица мира
+		DirectX::XMMATRIX viewmatrix;		// Матрица вида
+		DirectX::XMMATRIX projectionmatrix;	// Матрица проекции
+	};
 	class directx {
 		public:
 			directx(winmodule::window* win);
@@ -15,7 +25,7 @@ namespace dxmodule {
 			ID3D11DeviceContext* getdevicecontext();
 			IDXGISwapChain* getswapchain();
 			ID3D11RenderTargetView* getrendertargetview();
-			void resizedx(winmodule::window* win);
+			bool resizedx(winmodule::window* win);
 		private:
 			HRESULT hr;
 			D3D_DRIVER_TYPE cur_drivetype;
@@ -30,7 +40,7 @@ namespace dxmodule {
 		D3D11_BUFFER_DESC bd;
 		ZeroMemory(&bd, sizeof(bd));
 		bd.Usage = D3D11_USAGE_DEFAULT;
-		bd.ByteWidth = sizeof(T) * 3;
+		bd.ByteWidth = sizeof(structure) * sizeof(T);
 		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		bd.CPUAccessFlags = 0;
 		D3D11_SUBRESOURCE_DATA InitData;
@@ -40,13 +50,15 @@ namespace dxmodule {
 		*bufferpointer = buffer;
 		return hr;
 	}
+	HRESULT createindexbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer, WORD structure[]);
+	HRESULT createconstbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer);
 	inline HRESULT compileshader(WCHAR* file, LPCSTR entrypoint, LPCSTR profile, ID3DBlob** blobout);
 	class shaderoperator {
 		public:
 			shaderoperator();
 			virtual ~shaderoperator();
 			virtual bool addshader(WCHAR* filename, WCHAR* shadername, LPCSTR entrypoint, LPCSTR shadermodel, ID3D11Device* device) = 0;
-			size_t getshaderid(WCHAR* shadername);
+			int getshaderid(WCHAR* shadername);
 			size_t getvectorsize();
 			void deleteshader(size_t shaderid);
 			void updatehandled();
