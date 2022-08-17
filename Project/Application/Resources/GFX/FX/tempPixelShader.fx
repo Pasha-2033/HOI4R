@@ -20,7 +20,7 @@ float4 PS(float4 Pos : SV_POSITION) : SV_Target {
 //--------------------------------------------------------------------------------------
 // Переменные константных буферов
 //--------------------------------------------------------------------------------------
-cbuffer constantbufferstruct : register(b0) // b0 - индекс буфера
+cbuffer ConstantBuffer : register(b0) // b0 - индекс буфера
 {
 	matrix World;
 	matrix View;

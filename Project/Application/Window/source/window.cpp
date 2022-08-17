@@ -200,10 +200,10 @@ LRESULT CALLBACK winmodule::defaultwinproc::proc(HWND hwnd, UINT msg, WPARAM wpa
         case WM_DESTROY:
             PostQuitMessage(0);
             break;
-        //case WM_PAINT:
-        //    hdc = BeginPaint(hwnd, &ps);
-        //    EndPaint(hwnd, &ps);
-        //    break;
+        case WM_PAINT:
+            hdc = BeginPaint(hwnd, &ps);
+            EndPaint(hwnd, &ps);
+            break;
     }
     return 0;
 }

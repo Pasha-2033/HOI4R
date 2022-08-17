@@ -25,6 +25,7 @@ namespace dxmodule {
 			ID3D11DeviceContext* getdevicecontext();
 			IDXGISwapChain* getswapchain();
 			ID3D11RenderTargetView* getrendertargetview();
+			D3D_DRIVER_TYPE getcur_drivetype();
 			bool resizedx(winmodule::window* win);
 		private:
 			HRESULT hr;
@@ -35,12 +36,12 @@ namespace dxmodule {
 			ID3D11RenderTargetView* rendertargetview;
 	};
 	template<typename T>
-	HRESULT createvertexbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer, T structure[]) {
+	HRESULT createvertexbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer, T structure[], size_t size) {
 		ID3D11Buffer* buffer = nullptr;
 		D3D11_BUFFER_DESC bd;
 		ZeroMemory(&bd, sizeof(bd));
 		bd.Usage = D3D11_USAGE_DEFAULT;
-		bd.ByteWidth = sizeof(structure) * sizeof(T);
+		bd.ByteWidth = size * sizeof(T);
 		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		bd.CPUAccessFlags = 0;
 		D3D11_SUBRESOURCE_DATA InitData;
@@ -50,7 +51,7 @@ namespace dxmodule {
 		*bufferpointer = buffer;
 		return hr;
 	}
-	HRESULT createindexbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer, WORD structure[]);
+	HRESULT createindexbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer, WORD structure[], size_t size);
 	HRESULT createconstbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer);
 	inline HRESULT compileshader(WCHAR* file, LPCSTR entrypoint, LPCSTR profile, ID3DBlob** blobout);
 	class shaderoperator {

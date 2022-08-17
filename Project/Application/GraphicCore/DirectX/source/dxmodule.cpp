@@ -79,6 +79,9 @@ IDXGISwapChain* dxmodule::directx::getswapchain() {
 ID3D11RenderTargetView* dxmodule::directx::getrendertargetview() {
 	return rendertargetview;
 }
+D3D_DRIVER_TYPE dxmodule::directx::getcur_drivetype() {
+	return cur_drivetype;
+}
 bool dxmodule::directx::resizedx(winmodule::window* win) {
 	IDXGIDevice* idxgidevice = NULL;
 	IDXGIAdapter* idxgiadapter = NULL;
@@ -119,12 +122,12 @@ bool dxmodule::directx::resizedx(winmodule::window* win) {
 	devicecontext->RSSetViewports(1, &vp);
 	return true;
 }
-HRESULT dxmodule::createindexbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer, WORD structure[]) {
+HRESULT dxmodule::createindexbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer, WORD structure[], size_t size) {
 	ID3D11Buffer* buffer = nullptr;
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
 	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(structure) * sizeof(WORD);
+	bd.ByteWidth = sizeof(WORD) * size;
 	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	bd.CPUAccessFlags = 0;
 	D3D11_SUBRESOURCE_DATA InitData;
