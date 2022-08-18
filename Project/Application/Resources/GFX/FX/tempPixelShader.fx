@@ -54,5 +54,11 @@ VS_OUTPUT VS(float4 Pos : POSITION, float4 Color : COLOR)
 //--------------------------------------------------------------------------------------
 float4 PS(VS_OUTPUT input) : SV_Target
 {
-	return input.Color;
+	float xshift = 250.0f;
+	float yshift = 250.0f;//282.5f; для треугольника
+	float K = 50.0f;
+	float dist = sqrt((input.Pos.x - xshift) * (input.Pos.x - xshift) + (input.Pos.y - yshift) * (input.Pos.y - yshift));
+	dist = (dist % K) / K;
+	return input.Color * dist;
+	//return input.Color;
 }

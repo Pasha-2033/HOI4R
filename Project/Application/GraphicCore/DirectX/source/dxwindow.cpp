@@ -16,6 +16,8 @@ dxwindow::dxwindowclass::dxwindowclass(HINSTANCE hinstance, bool updatedxmodule,
 	winproc->addsubproc(new winmodule::defaultwinproc((WCHAR*)L"QUIT_MESSAGE"));
 	//настройка dx
 	dx->getdevicecontext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	//
+	projectionmatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV4, getW() / (FLOAT)getH(), znear, zfar);
 }
 dxwindow::dxwindowclass::~dxwindowclass() {}
 void dxwindow::dxwindowclass::setupdatedx(bool updatedxmodule) {
@@ -34,13 +36,17 @@ void dxwindow::dxwindowclass::setW(uint32_t width) {
 	w = width;
 	if (updatedx) {
 		dx->resizedx(this);
+		projectionmatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV4, getW() / (FLOAT)getH(), znear, zfar);
 	}
+	MoveWindow(win, x, y, w, h, TRUE);
 }
 void dxwindow::dxwindowclass::setH(uint32_t height) {
 	h = height;
 	if (updatedx) {
 		dx->resizedx(this);
+		projectionmatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV4, getW() / (FLOAT)getH(), znear, zfar);
 	}
+	MoveWindow(win, x, y, w, h, TRUE);
 }
 bool dxwindow::dxwindowclass::applyvertexshader(size_t shaderid) {
 	ID3D11InputLayout* shaderlayout = vso->getshaderlayout(shaderid);
@@ -106,4 +112,22 @@ std::vector<WCHAR*> dxwindow::dxwindowclass::getshaderlist(bool ispixelshader) {
 		}
 	}
 	return v;
+}
+void dxwindow::dxwindowclass::setznear(float z) {
+	znear = z;
+	if (updatedx) {
+		projectionmatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV4, getW() / (FLOAT)getH(), znear, zfar);
+	}
+}
+void dxwindow::dxwindowclass::setzfar(float z) {
+	zfar = z;
+	if (updatedx) {
+		projectionmatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV4, getW() / (FLOAT)getH(), znear, zfar);
+	}
+}
+float dxwindow::dxwindowclass::getznear() {
+	return znear;
+}
+float dxwindow::dxwindowclass::getzfar() {
+	return zfar;
 }

@@ -1,15 +1,12 @@
 #include "application.h"
 #include "GraphicCore/DirectX/include/dxwindow.h"
 void render();
+void rotate();
 dxwindow::dxwindowclass* dxwin = new dxwindow::dxwindowclass(NULL, true);
 ID3D11Buffer* vertexbuffer = nullptr;
 ID3D11Buffer* indexbuffer = nullptr;
 ID3D11Buffer* constbuffer = nullptr;
-DirectX::XMMATRIX worldmatrix;
-DirectX::XMMATRIX viewmatrix;
-DirectX::XMMATRIX projectionmatrix;
 UINT stride = sizeof(SimpleVertex);
-UINT offset = 0;
 static float t = 0.0f;
 /*SimpleVertex vertices[] = { //треугольник
     DirectX::XMFLOAT3(0.0f, 0.625f,  0.5f),
@@ -39,31 +36,25 @@ UINT vsize = ARRAYSIZE(vertices);
 UINT isize = ARRAYSIZE(indices);
 int main() {
     if (FAILED(dxwin->getHR())) return -1;
-    dxwin->setW(500);
-    dxwin->setH(500);
+    dxwin->setzfar(100.0f);
     
     dxmodule::createvertexbuffer(dxwin->getdx()->getdevice(), &vertexbuffer, vertices, vsize);
     dxmodule::createindexbuffer(dxwin->getdx()->getdevice(), &indexbuffer, indices, isize);
     dxmodule::createconstbuffer(dxwin->getdx()->getdevice(), &constbuffer);
-    dxwin->getdx()->getdevicecontext()->IASetVertexBuffers(0, 1, &vertexbuffer, &stride, &offset);
+    dxwin->getdx()->getdevicecontext()->IASetVertexBuffers(0, 1, &vertexbuffer, &stride, &dxwindow::offset);
     dxwin->getdx()->getdevicecontext()->IASetIndexBuffer(indexbuffer, DXGI_FORMAT_R16_UINT, 0);
 
     //______________________________________
-    //Инициализация матрицы мира
-    worldmatrix = DirectX::XMMatrixIdentity();
     // Инициализация матрицы вида
-    DirectX::XMVECTOR Eye = DirectX::XMVectorSet(0.0f, -1.0f, -10.0f, 1200.0f);	// Откуда смотрим
+    DirectX::XMVECTOR Eye = DirectX::XMVectorSet(0.0f, -2.0f, -10.0f, 1200.0f);	// Откуда смотрим
     DirectX::XMVECTOR At = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);	// Куда смотрим
     DirectX::XMVECTOR Up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);	// Направление верха
-    viewmatrix = DirectX::XMMatrixLookAtLH(Eye, At, Up);
-    //Инициализация матрицы проекции
-    projectionmatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV4, dxwin->getW() / (FLOAT)dxwin->getH(), 0.01f, 100.0f); //to do (сделать так, чтобы обновление размера окна вызывало изменение этой матрицы)
+    dxwin->viewmatrix = DirectX::XMMatrixLookAtLH(Eye, At, Up);
     //
-    worldmatrix = DirectX::XMMatrixRotationY(4.0f);
     dxmodule::constantbufferstruct cb;
-    cb.worldmatrix = DirectX::XMMatrixTranspose(worldmatrix);
-    cb.viewmatrix = DirectX::XMMatrixTranspose(viewmatrix);
-    cb.projectionmatrix = DirectX::XMMatrixTranspose(projectionmatrix);
+    cb.worldmatrix = DirectX::XMMatrixTranspose(dxwin->worldmatrix);
+    cb.viewmatrix = DirectX::XMMatrixTranspose(dxwin->viewmatrix);
+    cb.projectionmatrix = DirectX::XMMatrixTranspose(dxwin->projectionmatrix);
     dxwin->getdx()->getdevicecontext()->UpdateSubresource(constbuffer, 0, NULL, &cb, 0, 0);
     //______________________________________
 
@@ -72,18 +63,19 @@ int main() {
     dxwin->applyvertexshader(0);
     dxwin->applypixelshader(0);
     dxwin->getdx()->getdevicecontext()->VSSetConstantBuffers(0, 1, &constbuffer);
+    dxwin->setW(1000);
+    dxwin->setH(500);
     dxwin->setshowmode(winmodule::windowshowmode::customsize);
     dxwin->setV(true);
-    while (true) {
-        render();
-    }
-    MSG msg;
-    while (GetMessage(&msg, NULL, 0, 0)) {
+
+    MSG msg = { 0 };
+    while (WM_QUIT != msg.message) {
         if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
         else {
+            rotate(); // Обновить матрицу мира
             render();
         }
     }
@@ -92,6 +84,10 @@ int main() {
 void render() {
     float ClearColor[4] = { 0.0f, 0.0f, 1.0f, 1.0f }; // красный, зеленый, синий, альфа-канал
     dxwin->getdx()->getdevicecontext()->ClearRenderTargetView(dxwin->getdx()->getrendertargetview(), ClearColor);
+    dxwin->getdx()->getdevicecontext()->DrawIndexed(18, 0, 0);
+    dxwin->getdx()->getswapchain()->Present(0, 0);
+}
+void rotate() {
     //
     // Обновление переменной-времени
     if (dxwin->getdx()->getcur_drivetype() == D3D_DRIVER_TYPE_REFERENCE)
@@ -108,17 +104,15 @@ void render() {
     }
 
     // Вращать мир по оси Y на угол t (в радианах)
-    worldmatrix = DirectX::XMMatrixRotationY(t);
+    dxwin->worldmatrix = DirectX::XMMatrixRotationY(t);
 
     // Обновить константный буфер
     // создаем временную структуру и загружаем в нее матрицы
     dxmodule::constantbufferstruct cb;
-    cb.worldmatrix = DirectX::XMMatrixTranspose(worldmatrix);
-    cb.viewmatrix = DirectX::XMMatrixTranspose(viewmatrix);
-    cb.projectionmatrix = DirectX::XMMatrixTranspose(projectionmatrix);
+    cb.worldmatrix = DirectX::XMMatrixTranspose(dxwin->worldmatrix);
+    cb.viewmatrix = DirectX::XMMatrixTranspose(dxwin->viewmatrix);
+    cb.projectionmatrix = DirectX::XMMatrixTranspose(dxwin->projectionmatrix);
     // загружаем временную структуру в константный буфер g_pConstantBuffer
     dxwin->getdx()->getdevicecontext()->UpdateSubresource(constbuffer, 0, NULL, &cb, 0, 0);
     //
-    dxwin->getdx()->getdevicecontext()->DrawIndexed(18, 0, 0);
-    dxwin->getdx()->getswapchain()->Present(0, 0);
 }
