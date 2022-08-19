@@ -45,12 +45,6 @@ int main() {
     dxwin->getdx()->getdevicecontext()->IASetIndexBuffer(indexbuffer, DXGI_FORMAT_R16_UINT, 0);
 
     //______________________________________
-    // Инициализация матрицы вида
-    DirectX::XMVECTOR Eye = DirectX::XMVectorSet(0.0f, -2.0f, -10.0f, 1200.0f);	// Откуда смотрим
-    DirectX::XMVECTOR At = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);	// Куда смотрим
-    DirectX::XMVECTOR Up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);	// Направление верха
-    dxwin->viewmatrix = DirectX::XMMatrixLookAtLH(Eye, At, Up);
-    //
     dxmodule::constantbufferstruct cb;
     cb.worldmatrix = DirectX::XMMatrixTranspose(dxwin->worldmatrix);
     cb.viewmatrix = DirectX::XMMatrixTranspose(dxwin->viewmatrix);
@@ -104,7 +98,14 @@ void rotate() {
     }
 
     // Вращать мир по оси Y на угол t (в радианах)
-    dxwin->worldmatrix = DirectX::XMMatrixRotationY(t);
+    //dxwin->worldmatrix = DirectX::XMMatrixRotationY(t);
+
+    // Вращать камеру это команды set<NN>_rotation
+    // Плоскость вращения обозначена 2мя осями, Х от центра направо, У от центра вверх, Z от центра вперед
+    dxwin->getcamera()->setXZ_rotation(0.0001f + dxwin->getcamera()->getXZ_rotation());
+    //dxwin->getcamera()->setXY_rotation(0.0001f + dxwin->getcamera()->getXY_rotation());
+    //dxwin->getcamera()->setYZ_rotation(0.0001f + dxwin->getcamera()->getYZ_rotation());
+    dxwin->viewmatrix = dxwin->getcamera()->getviewpoint();
 
     // Обновить константный буфер
     // создаем временную структуру и загружаем в нее матрицы

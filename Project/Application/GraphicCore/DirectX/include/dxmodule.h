@@ -51,8 +51,8 @@ namespace dxmodule {
 		*bufferpointer = buffer;
 		return hr;
 	}
-	HRESULT createindexbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer, WORD structure[], size_t size);
-	HRESULT createconstbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer);
+	HRESULT createindexbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer, WORD* structure, size_t size);	//почему-то нельзя inline
+	HRESULT createconstbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer);									//почему-то нельзя inline
 	inline HRESULT compileshader(WCHAR* file, LPCSTR entrypoint, LPCSTR profile, ID3DBlob** blobout);
 	class shaderoperator {
 		public:

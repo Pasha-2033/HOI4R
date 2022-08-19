@@ -1,4 +1,67 @@
 #include "../include/dxwindow.h"
+dxwindow::camera::camera() {
+	recalculatevectros();
+}
+dxwindow::camera::~camera() {}
+DirectX::XMMATRIX dxwindow::camera::getviewpoint() {
+	return mymatrix;
+}
+void dxwindow::camera::setX(float value) {
+	x = value;
+	recalculatevectros();
+}
+void dxwindow::camera::setY(float value) {
+	y = value;
+	recalculatevectros();
+}
+void dxwindow::camera::setZ(float value) {
+	z = value;
+	recalculatevectros();
+}
+void dxwindow::camera::setW(float value) {
+	w = value;
+	recalculatevectros();
+}
+void dxwindow::camera::setXY_rotation(float value) {
+	xy_rotation = value;
+	recalculatevectros();
+}
+void dxwindow::camera::setXZ_rotation(float value) {
+	xz_rotation = value;
+	recalculatevectros();
+}
+void dxwindow::camera::setYZ_rotation(float value) {
+	yz_rotation = value;
+	recalculatevectros();
+}
+float dxwindow::camera::getX() {
+	return x;
+}
+float dxwindow::camera::getY() {
+	return y;
+}
+float dxwindow::camera::getZ() {
+	return z;
+}
+float dxwindow::camera::getW() {
+	return w;
+}
+float dxwindow::camera::getXY_rotation() {
+	return xy_rotation;
+}
+float dxwindow::camera::getXZ_rotation() {
+	return xz_rotation;
+}
+float dxwindow::camera::getYZ_rotation() {
+	return yz_rotation;
+}
+void dxwindow::camera::recalculatevectros() {
+	float dz = cos(xz_rotation) * cos(yz_rotation);
+	DirectX::XMVECTOR Eye = DirectX::XMVectorSet(x, y, z, w);	// Откуда смотрим
+	DirectX::XMVECTOR At = DirectX::XMVectorSet(x + sin(xz_rotation), y + sin(yz_rotation), z + dz, w);	// Куда смотрим
+	DirectX::XMVECTOR Up = DirectX::XMVectorSet(sin(xy_rotation), cos(xy_rotation), 0.0f, w);	// Направление верха
+	mymatrix = DirectX::XMMatrixLookAtLH(Eye, At, Up);
+}
 dxwindow::dxwindowclass::dxwindowclass(HINSTANCE hinstance, bool updatedxmodule, RECT rect) : winmodule::window(hinstance, winmodule::extendedwinproc::wndproc, (WCHAR*)L"UNNAMEDCLASS", (WCHAR*)L"", rect), updatedx(updatedxmodule) {
 	//инициализация
 	if (FAILED(hr)) {
@@ -16,7 +79,14 @@ dxwindow::dxwindowclass::dxwindowclass(HINSTANCE hinstance, bool updatedxmodule,
 	winproc->addsubproc(new winmodule::defaultwinproc((WCHAR*)L"QUIT_MESSAGE"));
 	//настройка dx
 	dx->getdevicecontext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	//
+	//настройка матриц
+	//-----настроить----
+	hwndcamera->setY(1.0f);
+	hwndcamera->setZ(- 10.0f);
+	//hwndcamera->xz_rotation = -0.25f;
+	//hwndcamera->setYZ_rotation(- 0.15f);
+	viewmatrix = hwndcamera->getviewpoint();
+	//------------------
 	projectionmatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV4, getW() / (FLOAT)getH(), znear, zfar);
 }
 dxwindow::dxwindowclass::~dxwindowclass() {}
@@ -112,6 +182,9 @@ std::vector<WCHAR*> dxwindow::dxwindowclass::getshaderlist(bool ispixelshader) {
 		}
 	}
 	return v;
+}
+dxwindow::camera* dxwindow::dxwindowclass::getcamera() {
+	return hwndcamera;
 }
 void dxwindow::dxwindowclass::setznear(float z) {
 	znear = z;

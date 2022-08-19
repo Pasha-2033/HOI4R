@@ -6,6 +6,36 @@
 namespace dxwindow {
 	static const UINT stride = sizeof(dxmodule::simplevertex); //to do (dxmodule::simplevertex) 
 	static const UINT offset = 0;
+	class camera {
+		public:
+			camera();
+			~camera();
+			DirectX::XMMATRIX getviewpoint();
+			void setX(float value);
+			void setY(float value);
+			void setZ(float value);
+			void setW(float value);
+			void setXY_rotation(float value);
+			void setXZ_rotation(float value);
+			void setYZ_rotation(float value);
+			float getX();
+			float getY();
+			float getZ();
+			float getW();
+			float getXY_rotation();
+			float getXZ_rotation();
+			float getYZ_rotation();
+		private:
+			void recalculatevectros();
+			float x = 0.0f;
+			float y = 0.0f;
+			float z = 0.0f;
+			float xy_rotation = 0.0f;
+			float xz_rotation = 0.0f;
+			float yz_rotation = 0.0f;
+			float w = 1.0f;	//Разделение перспективы - трансформация в усеченное пространство (очень интересно, но ничего не понятно)
+			DirectX::XMMATRIX mymatrix;
+	};
 	class dxwindowclass : public winmodule::window {
 		public:
 			dxwindowclass(HINSTANCE hinstance = NULL, bool updatedxmodule = false, RECT rect = {0,0,0,0});
@@ -29,6 +59,7 @@ namespace dxwindow {
 			DirectX::XMMATRIX worldmatrix = DirectX::XMMatrixIdentity();//temp
 			DirectX::XMMATRIX viewmatrix;								//
 			DirectX::XMMATRIX projectionmatrix;							//
+			camera* getcamera();
 
 			void setznear(float z);
 			void setzfar(float z);
@@ -52,6 +83,7 @@ namespace dxwindow {
 			//DirectX::XMMATRIX projectionmatrix;
 			float znear = 0.001f;	//то насколько близко мы не видим
 			float zfar = 1.0f;		//то насколько далеко мы видим
+			camera* hwndcamera = new camera;
 	};
 
 }

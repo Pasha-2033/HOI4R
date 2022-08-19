@@ -122,7 +122,7 @@ bool dxmodule::directx::resizedx(winmodule::window* win) {
 	devicecontext->RSSetViewports(1, &vp);
 	return true;
 }
-HRESULT dxmodule::createindexbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer, WORD structure[], size_t size) {
+HRESULT dxmodule::createindexbuffer(ID3D11Device* device, ID3D11Buffer** bufferpointer, WORD* structure, size_t size) {
 	ID3D11Buffer* buffer = nullptr;
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
