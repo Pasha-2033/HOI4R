@@ -2,10 +2,7 @@
 #include "GraphicCore/DirectX/include/dxwindow.h"
 void render();
 void rotate();
-dxwindow::dxwindowclass* dxwin = new dxwindow::dxwindowclass(NULL, true);
-ID3D11Buffer* vertexbuffer = nullptr;
-ID3D11Buffer* indexbuffer = nullptr;
-ID3D11Buffer* constbuffer = nullptr;
+dxwindow::dxwindowclass* dxwin = new dxwindow::dxwindowclass(NULL, true, true);
 UINT stride = sizeof(SimpleVertex);
 static float t = 0.0f;
 /*SimpleVertex vertices[] = { //треугольник
@@ -38,25 +35,25 @@ int main() {
     if (FAILED(dxwin->getHR())) return -1;
     dxwin->setzfar(100.0f);
     
-    dxmodule::createvertexbuffer(dxwin->getdx()->getdevice(), &vertexbuffer, vertices, vsize);
-    dxmodule::createindexbuffer(dxwin->getdx()->getdevice(), &indexbuffer, indices, isize);
-    dxmodule::createconstbuffer(dxwin->getdx()->getdevice(), &constbuffer);
-    dxwin->getdx()->getdevicecontext()->IASetVertexBuffers(0, 1, &vertexbuffer, &stride, &dxwindow::offset);
-    dxwin->getdx()->getdevicecontext()->IASetIndexBuffer(indexbuffer, DXGI_FORMAT_R16_UINT, 0);
+    dxmodule::createvertexbuffer(dxwin->getdx()->getdevice(), dxwin->vertexbuffer, vertices, vsize);
+    dxmodule::createindexbuffer(dxwin->getdx()->getdevice(), dxwin->indexbuffer, indices, isize);
+    dxmodule::createconstbuffer(dxwin->getdx()->getdevice(), dxwin->constbuffer);
+    dxwin->getdx()->getdevicecontext()->IASetVertexBuffers(0, 1, &dxwin->vertexbuffer, &stride, &dxwindow::offset);
+    dxwin->getdx()->getdevicecontext()->IASetIndexBuffer(dxwin->indexbuffer, DXGI_FORMAT_R16_UINT, 0);
 
     //______________________________________
     dxmodule::constantbufferstruct cb;
     cb.worldmatrix = DirectX::XMMatrixTranspose(dxwin->worldmatrix);
     cb.viewmatrix = DirectX::XMMatrixTranspose(dxwin->viewmatrix);
     cb.projectionmatrix = DirectX::XMMatrixTranspose(dxwin->projectionmatrix);
-    dxwin->getdx()->getdevicecontext()->UpdateSubresource(constbuffer, 0, NULL, &cb, 0, 0);
+    dxwin->getdx()->getdevicecontext()->UpdateSubresource(dxwin->constbuffer, 0, NULL, &cb, 0, 0);
     //______________________________________
 
     dxwin->addshader((WCHAR*)L"Application/Resources/GFX/FX/tempPixelShader.fx", (WCHAR*)L"Pixel Shader 0", "VS", "vs_4_0", false);
     dxwin->addshader((WCHAR*)L"Application/Resources/GFX/FX/tempPixelShader.fx", (WCHAR*)L"Pixel Shader 0", "PS", "ps_4_0", true);
     dxwin->applyvertexshader(0);
     dxwin->applypixelshader(0);
-    dxwin->getdx()->getdevicecontext()->VSSetConstantBuffers(0, 1, &constbuffer);
+    dxwin->getdx()->getdevicecontext()->VSSetConstantBuffers(0, 1, &dxwin->constbuffer);
     dxwin->setW(1000);
     dxwin->setH(500);
     dxwin->setshowmode(winmodule::windowshowmode::customsize);
@@ -78,6 +75,7 @@ int main() {
 void render() {
     float ClearColor[4] = { 0.0f, 0.0f, 1.0f, 1.0f }; // красный, зеленый, синий, альфа-канал
     dxwin->getdx()->getdevicecontext()->ClearRenderTargetView(dxwin->getdx()->getrendertargetview(), ClearColor);
+    dxwin->getdx()->getdevicecontext()->ClearDepthStencilView(dxwin->getdx()->getzbuffer(), D3D11_CLEAR_DEPTH, 1.0f, 0);
     dxwin->getdx()->getdevicecontext()->DrawIndexed(18, 0, 0);
     dxwin->getdx()->getswapchain()->Present(0, 0);
 }
@@ -98,13 +96,13 @@ void rotate() {
     }
 
     // Вращать мир по оси Y на угол t (в радианах)
-    //dxwin->worldmatrix = DirectX::XMMatrixRotationY(t);
+    dxwin->worldmatrix = DirectX::XMMatrixRotationY(t);
 
     // Вращать камеру это команды set<NN>_rotation
     // Плоскость вращения обозначена 2мя осями, Х от центра направо, У от центра вверх, Z от центра вперед
-    dxwin->getcamera()->setXZ_rotation(0.0001f + dxwin->getcamera()->getXZ_rotation());
-    //dxwin->getcamera()->setXY_rotation(0.0001f + dxwin->getcamera()->getXY_rotation());
-    //dxwin->getcamera()->setYZ_rotation(0.0001f + dxwin->getcamera()->getYZ_rotation());
+    //dxwin->getcamera()->setY_rotation(0.0001f + dxwin->getcamera()->getY_rotation());
+    //dxwin->getcamera()->setZ_rotation(0.0001f + dxwin->getcamera()->getZ_rotation());
+    dxwin->getcamera()->setX_rotation(0.00001f + dxwin->getcamera()->getX_rotation());
     dxwin->viewmatrix = dxwin->getcamera()->getviewpoint();
 
     // Обновить константный буфер
@@ -114,6 +112,6 @@ void rotate() {
     cb.viewmatrix = DirectX::XMMatrixTranspose(dxwin->viewmatrix);
     cb.projectionmatrix = DirectX::XMMatrixTranspose(dxwin->projectionmatrix);
     // загружаем временную структуру в константный буфер g_pConstantBuffer
-    dxwin->getdx()->getdevicecontext()->UpdateSubresource(constbuffer, 0, NULL, &cb, 0, 0);
+    dxwin->getdx()->getdevicecontext()->UpdateSubresource(dxwin->constbuffer, 0, NULL, &cb, 0, 0);
     //
 }

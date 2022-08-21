@@ -15,30 +15,30 @@ namespace dxwindow {
 			void setY(float value);
 			void setZ(float value);
 			void setW(float value);
-			void setXY_rotation(float value);
-			void setXZ_rotation(float value);
-			void setYZ_rotation(float value);
+			void setX_rotation(float value);
+			void setY_rotation(float value);
+			void setZ_rotation(float value);
 			float getX();
 			float getY();
 			float getZ();
 			float getW();
-			float getXY_rotation();
-			float getXZ_rotation();
-			float getYZ_rotation();
+			float getX_rotation();
+			float getY_rotation();
+			float getZ_rotation();
 		private:
 			void recalculatevectros();
 			float x = 0.0f;
 			float y = 0.0f;
 			float z = 0.0f;
-			float xy_rotation = 0.0f;
-			float xz_rotation = 0.0f;
-			float yz_rotation = 0.0f;
+			float x_rotation = 0.0f;
+			float y_rotation = 0.0f;
+			float z_rotation = 0.0f;
 			float w = 1.0f;	//Разделение перспективы - трансформация в усеченное пространство (очень интересно, но ничего не понятно)
 			DirectX::XMMATRIX mymatrix;
 	};
 	class dxwindowclass : public winmodule::window {
 		public:
-			dxwindowclass(HINSTANCE hinstance = NULL, bool updatedxmodule = false, RECT rect = {0,0,0,0});
+			dxwindowclass(HINSTANCE hinstance = NULL, bool updatedxmodule = false, bool useZbuffer = false, RECT rect = {0,0,0,0});
 			~dxwindowclass();
 
 			void setupdatedx(bool updatedxmodule);
@@ -59,6 +59,9 @@ namespace dxwindow {
 			DirectX::XMMATRIX worldmatrix = DirectX::XMMatrixIdentity();//temp
 			DirectX::XMMATRIX viewmatrix;								//
 			DirectX::XMMATRIX projectionmatrix;							//
+			ID3D11Buffer* vertexbuffer = nullptr;						//
+			ID3D11Buffer* indexbuffer = nullptr;						//
+			ID3D11Buffer* constbuffer = nullptr;						//
 			camera* getcamera();
 
 			void setznear(float z);
@@ -66,8 +69,6 @@ namespace dxwindow {
 			float getznear();
 			float getzfar();
 
-			//void forceupdatedx(<some_mode = all>); //чтобы изменения применились не вовремя установки параметров, а только когда это нужно (будет полезно только при updatedx = true)
-			//void renderobject(SimpleVertex verticles, size_t vertexsize, WORD indices, size_t indexsize);
 		private:
 			bool updatedx = false;
 			HRESULT hr;
@@ -75,9 +76,9 @@ namespace dxwindow {
 			dxmodule::directx* dx;
 			dxmodule::pixelshaderoperator* pso = new dxmodule::pixelshaderoperator;
 			dxmodule::vertexshaderoperator* vso = new dxmodule::vertexshaderoperator;
-			ID3D11Buffer* vertexbuffer = nullptr;
-			ID3D11Buffer* indexbuffer = nullptr;
-			ID3D11Buffer* constbuffer = nullptr;
+			//ID3D11Buffer* vertexbuffer = nullptr;
+			//ID3D11Buffer* indexbuffer = nullptr;
+			//ID3D11Buffer* constbuffer = nullptr;
 			//DirectX::XMMATRIX worldmatrix = DirectX::XMMatrixIdentity();
 			//DirectX::XMMATRIX viewmatrix;
 			//DirectX::XMMATRIX projectionmatrix;

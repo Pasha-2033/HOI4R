@@ -22,16 +22,16 @@ void dxwindow::camera::setW(float value) {
 	w = value;
 	recalculatevectros();
 }
-void dxwindow::camera::setXY_rotation(float value) {
-	xy_rotation = value;
+void dxwindow::camera::setX_rotation(float value) {
+	x_rotation = value;
 	recalculatevectros();
 }
-void dxwindow::camera::setXZ_rotation(float value) {
-	xz_rotation = value;
+void dxwindow::camera::setY_rotation(float value) {
+	y_rotation = value;
 	recalculatevectros();
 }
-void dxwindow::camera::setYZ_rotation(float value) {
-	yz_rotation = value;
+void dxwindow::camera::setZ_rotation(float value) {
+	z_rotation = value;
 	recalculatevectros();
 }
 float dxwindow::camera::getX() {
@@ -46,28 +46,28 @@ float dxwindow::camera::getZ() {
 float dxwindow::camera::getW() {
 	return w;
 }
-float dxwindow::camera::getXY_rotation() {
-	return xy_rotation;
+float dxwindow::camera::getX_rotation() {
+	return x_rotation;
 }
-float dxwindow::camera::getXZ_rotation() {
-	return xz_rotation;
+float dxwindow::camera::getY_rotation() {
+	return y_rotation;
 }
-float dxwindow::camera::getYZ_rotation() {
-	return yz_rotation;
+float dxwindow::camera::getZ_rotation() {
+	return z_rotation;
 }
 void dxwindow::camera::recalculatevectros() {
-	float dz = cos(xz_rotation) * cos(yz_rotation);
+	float dz = cos(y_rotation) * cos(x_rotation);
 	DirectX::XMVECTOR Eye = DirectX::XMVectorSet(x, y, z, w);	// Откуда смотрим
-	DirectX::XMVECTOR At = DirectX::XMVectorSet(x + sin(xz_rotation), y + sin(yz_rotation), z + dz, w);	// Куда смотрим
-	DirectX::XMVECTOR Up = DirectX::XMVectorSet(sin(xy_rotation), cos(xy_rotation), 0.0f, w);	// Направление верха
+	DirectX::XMVECTOR At = DirectX::XMVectorSet(x + sin(y_rotation), y + sin(x_rotation), z + dz, w);	// Куда смотрим
+	DirectX::XMVECTOR Up = DirectX::XMVectorSet(sin(z_rotation), cos(z_rotation), 0.0f, w);	// Направление верха
 	mymatrix = DirectX::XMMatrixLookAtLH(Eye, At, Up);
 }
-dxwindow::dxwindowclass::dxwindowclass(HINSTANCE hinstance, bool updatedxmodule, RECT rect) : winmodule::window(hinstance, winmodule::extendedwinproc::wndproc, (WCHAR*)L"UNNAMEDCLASS", (WCHAR*)L"", rect), updatedx(updatedxmodule) {
+dxwindow::dxwindowclass::dxwindowclass(HINSTANCE hinstance, bool updatedxmodule, bool useZbuffer, RECT rect) : winmodule::window(hinstance, winmodule::extendedwinproc::wndproc, (WCHAR*)L"UNNAMEDCLASS", (WCHAR*)L"", rect), updatedx(updatedxmodule) {
 	//инициализация
 	if (FAILED(hr)) {
 		return;
 	}
-	dx = new dxmodule::directx(this);
+	dx = new dxmodule::directx(this, useZbuffer);
 	hr = dx->getHR();
 	if (FAILED(hr)) {
 		delete dx;
